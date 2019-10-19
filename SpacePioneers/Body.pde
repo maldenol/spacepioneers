@@ -1,5 +1,4 @@
-class Body
-{
+class Body {
   private PVector pos;
   private PVector speed;
   private float mass;
@@ -7,9 +6,10 @@ class Body
   private float density;
   private PVector angle;
   private PVector angleSpeed;
+  private boolean deleted;
   
-  public Body(PVector pos, float radius, float density)
-  {
+
+  public Body(PVector pos, float radius, float density) {
     this.pos = pos.copy();
     this.speed = new PVector(0, 0, 0);
     this.radius = radius;
@@ -17,103 +17,101 @@ class Body
     this.updateMass();
     this.angle = new PVector(0, 0, 0);
     this.angleSpeed = new PVector(0, 0, 0);
+    this.deleted = false;
   }
   
-  public Body(float x, float y, float z, float radius, float density)
-  {
+  public Body(float x, float y, float z, float radius, float density) {
     this(new PVector(x, y, z), radius, density);
   }
   
-  public void setPos(PVector value)
-  {
+  public void setPos(PVector value) {
     this.pos = value.copy();
   }
   
-  public void setPos(float x, float y, float z)
-  {
+  public void setPos(float x, float y, float z) {
     this.pos = new PVector(x, y, z);
   }
   
-  public PVector getPos()
-  {
+  public PVector getPos() {
     return this.pos.copy();
   }
   
-  public void setSpeed(PVector value)
-  {
+  public void setSpeed(PVector value) {
     this.speed = value.copy();
   }
   
-  public void setSpeed(float x, float y, float z)
-  {
+  public void setSpeed(float x, float y, float z) {
     this.speed = new PVector(x, y, z);
   }
   
-  public PVector getSpeed()
-  {
+  public PVector getSpeed() {
     return this.speed.copy();
   }
   
-  public float updateMass()
-  {
-    this.mass = this.density * PI * this.radius*this.radius*this.radius * 4/3;
+  public float updateMass() {
+    this.mass = this.density * PI * this.radius*this.radius*this.radius * 4/3.0;
     return mass;
   }
   
-  public float getMass()
-  {
+  public float getMass() {
     return this.mass;
   }
   
-  public void setRadius(float value)
-  {
+  public void setRadius(float value) {
     this.radius = value;
     this.updateMass();
   }
   
-  public float getRadius()
-  {
+  public float getRadius() {
     return this.radius;
   }
   
-  public void setDensity(float value)
-  {
+  public void setDensity(float value) {
     this.density = value;
     this.updateMass();
   }
   
-  public float getDensity()
-  {
+  public float getDensity() {
     return this.density;
   }
   
-  public void setAngle(PVector value)
-  {
+  public void setAngle(PVector value) {
     this.angle = value.copy();
   }
   
-  public void setAngle(float x, float y, float z)
-  {
+  public void setAngle(float x, float y, float z) {
     this.angle = new PVector(x, y, z);
   }
   
-  public PVector getAngle()
-  {
+  public PVector getAngle() {
     return this.angle.copy();
   }
   
-  public void setAngleSpeed(PVector value)
-  {
+  public void setAngleSpeed(PVector value) {
     this.angleSpeed = value.copy();
   }
   
-  public void setAngleSpeed(float x, float y, float z)
-  {
+  public void setAngleSpeed(float x, float y, float z) {
     this.angleSpeed = new PVector(x, y, z);
   }
   
-  public PVector getAngleSpeed()
-  {
+  public PVector getAngleSpeed() {
     return this.angleSpeed.copy();
+  }
+  
+  public void accelerate(PVector value) {
+    this.speed.add(value);
+  }
+  
+  public void accelerateAngle(PVector value) {
+    this.angleSpeed.add(value);
+  }
+
+  public void delete() {
+    this.deleted = true;
+  }
+
+  public boolean isDeleted() {
+    return this.deleted;
   }
 };
