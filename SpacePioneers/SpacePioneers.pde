@@ -1,15 +1,11 @@
 /***
-  "Space Pioneers" project
-  NASA Space Apps Challange 2019
-  "Up, out and away!"
+  "Space Pioneers"
 ***/
 
-void setup()
-{
+void setup() {
   
 };
 
-void draw()
-{
+void draw() {
   
 };
