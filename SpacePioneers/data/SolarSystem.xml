@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<space gravitationalConstant="6.67E-11" detailMode="1" valuesKoefficient="1E-6">
+	<body name="" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="0" angPosY="0" angPosZ="0" angPeriod="1" mass="0" radius="0" semiMajorAxis="0" eccentricity="0" argumentOfPeriapsis="0" longitudeOfAscendingNode="0" inclination="0" meanAnomaly="0">
+		<body name="sun" posX="0" posY="0" posZ="6E9" velX="0" velY="0" velZ="0" angPosX="63.52" angPosY="0" angPosZ="0" angPeriod="2.16432E6" mass="1.9885E30" radius="6.9551E8" semiMajorAxis="0" eccentricity="0" argumentOfPeriapsis="0" longitudeOfAscendingNode="0" inclination="0" meanAnomaly="0">
+			<body name="mercury" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="61.45" angPosY="0" angPosZ="0" angPeriod="5.0670144E6" mass="3.33022E23" radius="2.4397E6" semiMajorAxis="5.7909227E10" eccentricity="0.20563593" argumentOfPeriapsis="29.24279" longitudeOfAscendingNode="48.33167" inclination="6.34" meanAnomaly="174.795884">
+			</body>
+			<body name="venus" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="67.16" angPosY="0" angPosZ="0" angPeriod="-2.099736E7" mass="4.8675E24" radius="6.0518E6" semiMajorAxis="1.0820893E11" eccentricity="0.0068" argumentOfPeriapsis="54.85229" longitudeOfAscendingNode="76.67069" inclination="2.5" meanAnomaly="0">
+			</body>
+			<body name="earth" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="23.4392811" angPosY="0" angPosZ="0" angPeriod="8.6164100352E5" mass="5.9726E24" radius="6.371E6" semiMajorAxis="1.49598261E11" eccentricity="0.01671123" argumentOfPeriapsis="114.20783" longitudeOfAscendingNode="348.73936" inclination="1.57869" meanAnomaly="357.51716">
+				<body name="moon" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="65.64" angPosY="0" angPosZ="0" angPeriod="2.3605915104E6" mass="7.3477E22" radius="1.7371E6" semiMajorAxis="3.84399E8" eccentricity="0.0549" argumentOfPeriapsis="0" longitudeOfAscendingNode="0" inclination="6.668" meanAnomaly="0">
+				</body>
+			</body>
+			<body name="mars" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="52.8865" angPosY="0" angPosZ="0" angPeriod="8.86426848E4" mass="6.4171E23" radius="2.2794382E8" semiMajorAxis="2.2794382E11" eccentricity="0.0933941" argumentOfPeriapsis="286.4623" longitudeOfAscendingNode="49.57854" inclination="0" meanAnomaly="0">
+			</body>
+			<body name="jupiter" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="64.495" angPosY="0" angPosZ="0" angPeriod="3.573E4" mass="1.8986E27" radius="6.9911E7" semiMajorAxis="7.785472E11" eccentricity="0.048775" argumentOfPeriapsis="275.066" longitudeOfAscendingNode="100.55615" inclination="0" meanAnomaly="0">
+			</body>
+			<body name="saturn" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="83.537" angPosY="0" angPosZ="0" angPeriod="3.8018E4" mass="5.6846E26" radius="5.8232E7" semiMajorAxis="1.429394069E12" eccentricity="0.055723219" argumentOfPeriapsis="336.013862" longitudeOfAscendingNode="113.642811" inclination="0" meanAnomaly="0">
+			</body>
+			<body name="uranus" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="-15.175" angPosY="0" angPosZ="0" angPeriod="-6.2063712E4" mass="8.6813E25" radius="2.5362E7" semiMajorAxis="2.876679082E12" eccentricity="0.044405586" argumentOfPeriapsis="96.541318" longitudeOfAscendingNode="73.989821" inclination="0" meanAnomaly="0">
+			</body>
+			<body name="neptune" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="42.950" angPosY="0" angPosZ="0" angPeriod="5.800032E4" mass="1.0243E26" radius="2.4622E7" semiMajorAxis="4.503443661E12" eccentricity="0.011214269" argumentOfPeriapsis="265.646853" longitudeOfAscendingNode="131.79431" inclination="0" meanAnomaly="0">
+			</body>
+			<body name="pluto" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="-6.163" angPosY="0" angPosZ="0" angPeriod="5.51856672E5" mass="1.303E22" radius="1.1883E6" semiMajorAxis="5.90638E12" eccentricity="0.2488273" argumentOfPeriapsis="113.76329" longitudeOfAscendingNode="110.30347" inclination="0" meanAnomaly="0">
+			</body>
+		</body>
+	</body>
+</space>
