@@ -2,7 +2,7 @@ import java.util.Iterator;
 
 
 class Space {
-    private float gConst, detailMode;
+    private float gConst, detailMode, valuesKoefficient;
     private ArrayList<Body> bodies;
     private PImage skybox;
     
@@ -23,6 +23,7 @@ class Space {
         this.detailMode = database.getFloat("detailMode");
         this.skybox = loadImage("data/textures/skybox.jpg");
         this.skybox.resize((int)(this.skybox.width * this.detailMode), 0);
+        this.valuesKoefficient = database.getFloat("valuesKoefficient");
         
         parents = database.getChildren("body");
         parents = parents[0].getChildren("body");
@@ -38,18 +39,18 @@ class Space {
         PImage texture;
         
         for (int i = 0; i < parents.length; i++) {
-            posX = parents[i].getFloat("posX");
-            posY = parents[i].getFloat("posY");
-            posZ = parents[i].getFloat("posZ");
-            velX = parents[i].getFloat("velX");
-            velY = parents[i].getFloat("velY");
-            velZ = parents[i].getFloat("velZ");
+            posX = parents[i].getFloat("posX") * this.valuesKoefficient;
+            posY = parents[i].getFloat("posY") * this.valuesKoefficient;
+            posZ = parents[i].getFloat("posZ") * this.valuesKoefficient;
+            velX = parents[i].getFloat("velX") * this.valuesKoefficient;
+            velY = parents[i].getFloat("velY") * this.valuesKoefficient;
+            velZ = parents[i].getFloat("velZ") * this.valuesKoefficient;
             angPosX = radians(new Float(parents[i].getFloat("angPosX")));
             angPosY = radians(parents[i].getFloat("angPosY"));
             angPosZ = radians(parents[i].getFloat("angPosZ"));
             angPeriod = parents[i].getFloat("angPeriod");
-            mass = parents[i].getFloat("mass");
-            radius = parents[i].getFloat("radius");
+            mass = parents[i].getFloat("mass") * this.valuesKoefficient*this.valuesKoefficient;
+            radius = parents[i].getFloat("radius") * this.valuesKoefficient;
             
             XML parent = parents[i].getParent();
             orbitMass = parent.getFloat("mass");
@@ -60,7 +61,7 @@ class Space {
             orbitVelY = parent.getFloat("velY");
             orbitVelZ = parent.getFloat("velZ");
             
-            semiMajorAxis = parents[i].getFloat("semiMajorAxis");
+            semiMajorAxis = parents[i].getFloat("semiMajorAxis") * this.valuesKoefficient;
             eccentricity = parents[i].getFloat("eccentricity");
             argumentOfPeriapsis = radians(parents[i].getFloat("argumentOfPeriapsis"));
             longitudeOfAscendingNode = radians(parents[i].getFloat("longitudeOfAscendingNode"));
