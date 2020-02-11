@@ -1,7 +1,7 @@
 /***
   "Space Pioneers"
   Space class
-  Malovanyi Denys
+  Malovanyi Denys Olehovych
 ***/
 
 import java.util.Iterator;

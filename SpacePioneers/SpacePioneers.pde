@@ -1,7 +1,7 @@
 /***
   "Space Pioneers"
   Main .pde file
-  Malovanyi Denys
+  Malovanyi Denys Olehovych
 ***/
 
 final int FPS = 60;

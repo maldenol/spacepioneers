@@ -1,7 +1,7 @@
 /***
   "Space Pioneers"
   Body class
-  Malovanyi Denys
+  Malovanyi Denys Olehovych
 ***/
 
 class Body {

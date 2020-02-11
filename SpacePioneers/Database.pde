@@ -1,7 +1,7 @@
 /***
   "Space Pioneers"
   Database class
-  Malovanyi Denys
+  Malovanyi Denys Olehovych
 ***/
 
 import java.io.File;

@@ -2,7 +2,7 @@
   "Space Pioneers"
   Interface class
   Button class
-  Malovanyi Denys
+  Malovanyi Denys Olehovych
 ***/
 
 class Interface {
@@ -14,7 +14,7 @@ class Interface {
     
     private Space space;
     private PShape skybox;
-    private Button menu, credits, play, editor;
+    private Button menu, credits, play, editor, exit;
     
     private PImage buffer[];
     private int xo, yo, swap, textureIndex, textureIndexMax;
@@ -48,7 +48,7 @@ class Interface {
         this.buffer[0].resize(width, height);
         this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
         
-        this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovich\nFebruary 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
+        this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
     }
     
     public void draw() {
@@ -170,6 +170,7 @@ class Interface {
 class Button {
     private float x, y, w, h;
     private String content;
+    
     
     public Button(float x, float y, float w, float h, String content) {
         this.x = x;
