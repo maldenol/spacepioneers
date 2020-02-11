@@ -1,3 +1,9 @@
+/***
+  "Space Pioneers"
+  Body class
+  Malovanyi Denys
+***/
+
 class Body {
     private PVector pos, vel;
     private float mass;

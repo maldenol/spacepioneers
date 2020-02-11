@@ -1,3 +1,9 @@
+/***
+  "Space Pioneers"
+  Space class
+  Malovanyi Denys
+***/
+
 import java.util.Iterator;
 
 
@@ -5,10 +11,13 @@ class Space {
     private float gConst, detailMode;
     private ArrayList<Body> bodies;
     private PImage skybox;
+    private Database db;
     
     
-    public Space(String name) {       
+    public Space(String name, Database db) {       
         bodies = new ArrayList<Body>();
+        
+        this.db = db;
         
         generate(name);
     }
@@ -21,7 +30,7 @@ class Space {
         database = loadXML("data/" + name + ".xml");
         this.gConst = database.getFloat("gravitationalConstant");
         this.detailMode = database.getFloat("detailMode");
-        this.skybox = loadImage("data/textures/skybox.jpg");
+        this.skybox = this.db.getTexture(database.getString("skybox"));
         this.skybox.resize((int)(this.skybox.width * this.detailMode), 0);
         
         parents = database.getChildren("body");
@@ -68,7 +77,7 @@ class Space {
             meanAnomaly = radians(parents[i].getFloat("meanAnomaly"));
             
             name = parents[i].getString("name");
-            texture = loadImage("data/textures/" + name + ".jpg");
+            texture = this.db.getTexture(name);
             texture.resize((int)(texture.width * this.detailMode), 0);
             
             Body body = new Body(posX, posY, posZ, mass, radius);
@@ -242,7 +251,7 @@ class Space {
         return force;
     }
     
-    public void show() {
+    public void draw() {
         for (Body item : this.bodies) {
             PVector pos = item.getPos();
             float[] angle = item.getAnglePos();
