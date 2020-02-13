@@ -100,10 +100,10 @@ class Interface {
         }
         else if(this.buttonPlay.isPressed(mouseX, mouseY)) {
             ArrayList<Button> buttonsList = new ArrayList<Button>();
-            float w = width / 2, h = height / 8;
-            float x = (width - w) / 2;
+            float w = width / 2, h = height / 16;
+            float x = (width - w) / 2, y0 = height / 8;
             for(String name : this.db.getXMLs())
-                buttonsList.add(new Button(x, h + buttonsList.size() * h, w, h, name));
+                buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
             this.buttons = new Button[buttonsList.size()];
             this.buttons = buttonsList.toArray(this.buttons);
             
@@ -161,10 +161,24 @@ class Interface {
         this.space.draw();
         
         endCamera();
+        
+        this.interfacePlay();
     }
     
     private void editor() {
+        background(0);
+        beginCamera();
+        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX, this.cameraCenterY, this.cameraCenterZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
         
+        translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
+        shape(this.skybox, 0, 0);
+        translate(-this.cameraPosX, -this.cameraPosY, -this.cameraPosZ);
+        
+        this.space.draw();
+        
+        endCamera();
+        
+        this.interfaceEditor();
     }
     
     private void chooseWorldPlay() {
@@ -242,6 +256,14 @@ class Interface {
                 this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
             }
         }
+    }
+    
+    private void interfacePlay() {
+        
+    }
+    
+    private void interfaceEditor() {
+        
     }
     
     
