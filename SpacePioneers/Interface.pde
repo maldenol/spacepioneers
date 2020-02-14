@@ -52,7 +52,7 @@ class Interface {
         this.buffer[0].resize(width, height);
         this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
         
-        this.buttonCreditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for buttonPlaying!";
+        this.buttonCreditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
     }
     
     public void draw() {
@@ -112,10 +112,10 @@ class Interface {
         }
         else if(this.buttonEditor.isPressed(mouseX, mouseY)) {
             ArrayList<Button> buttonsList = new ArrayList<Button>();
-            float w = width / 2, h = height / 8;
-            float x = (width - w) / 2;
+            float w = width / 2, h = height / 16;
+            float x = (width - w) / 2, y0 = height / 8;
             for(String name : this.db.getXMLs())
-                buttonsList.add(new Button(x, h + buttonsList.size() * h, w, h, name));
+                buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
             this.buttons = new Button[buttonsList.size()];
             this.buttons = buttonsList.toArray(this.buttons);
             
