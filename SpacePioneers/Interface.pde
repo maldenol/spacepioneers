@@ -14,9 +14,8 @@ class Interface {
     
     private Space space;
     private PShape skybox;
-    private Button buttonMenu, buttonCredits, buttonPlay, buttonEditor;
+    private Button buttonMenu, buttonCredits, buttonPlay, buttonSingleplayer, buttonMultiplayer, buttonEditor;
     private Button[] buttons;
-    private float px, py;
     
     private PImage[] buffer;
     private int xo, yo, swap, textureIndex, textureIndexMax;
@@ -25,6 +24,8 @@ class Interface {
     
     
     public Interface() {
+        float w, h, x;
+        
         this.context = 0;  
         
         this.db = new Database();
@@ -35,13 +36,18 @@ class Interface {
         this.cameraUpX = this.cameraUpZ = 0;
         this.cameraUpY = 1;
         
-        float w = width / 8, h = height / 16;
-        float x = (width - w) / 2;
+        w = width / 8;
+        h = height / 16;
+        x = (width - w) / 2;
         this.buttonMenu = new Button(0, 0, w, h, "MAIN MENU");
-        this.buttonPlay = new Button(x, height / 5 * 2 - h * 2, w, h, "PLAY");
-        this.buttonEditor = new Button(x, height / 5 * 3 - h * 2, w, h, "EDITOR");
-        this.buttonCredits = new Button(x, height / 5 * 4 - h * 2, w, h, "CREDITS");
-        this.px = this.py = 0;
+        this.buttonPlay = new Button(x, height / 5 * 2.5 - h * 2, w, h, "PLAY");
+        this.buttonCredits = new Button(x, height / 5 * 3.5 - h * 2, w, h, "CREDITS");
+        w = width / 8;
+        h = height / 8;
+        x = width - w;
+        this.buttonSingleplayer = new Button(x, height / 5 * 2 - h * 3 / 2, w, h, "SINGLEPLAYER");
+        this.buttonMultiplayer = new Button(x, height / 5 * 3 - h * 3 / 2, w, h, "MULTIPLAYER");
+        this.buttonEditor = new Button(x, height / 5 * 4 - h * 3 / 2, w, h, "EDITOR");
         
         this.xo = this.yo = this.swap = this.textureIndex = 0;
         this.textureIndexMax = this.db.getTextures().length;
@@ -70,10 +76,7 @@ class Interface {
                 this.editor();
                 break;
             case 4:
-                this.chooseWorldPlay();
-                break;
-            case 6:
-                this.chooseWorldEditor();
+                this.chooseWorld();
                 break;
             default:
                 this.context = 0;
@@ -92,7 +95,6 @@ class Interface {
         
         buttonCredits.draw();
         buttonPlay.draw();
-        buttonEditor.draw();
         
         if(this.buttonCredits.isPressed(mouseX, mouseY)) {
             this.context = 1;
@@ -108,18 +110,6 @@ class Interface {
             this.buttons = buttonsList.toArray(this.buttons);
             
             this.context = 4;
-            this.drawBackground();
-        }
-        else if(this.buttonEditor.isPressed(mouseX, mouseY)) {
-            ArrayList<Button> buttonsList = new ArrayList<Button>();
-            float w = width / 2, h = height / 16;
-            float x = (width - w) / 2, y0 = height / 8;
-            for(String name : this.db.getXMLs())
-                buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
-            this.buttons = new Button[buttonsList.size()];
-            this.buttons = buttonsList.toArray(this.buttons);
-            
-            this.context = 6;
             this.drawBackground();
         }
     }
@@ -181,9 +171,12 @@ class Interface {
         this.interfaceEditor();
     }
     
-    private void chooseWorldPlay() {
+    private void chooseWorld() {
         this.drawBackground();
         
+        this.buttonSingleplayer.draw();
+        this.buttonMultiplayer.draw();
+        this.buttonEditor.draw();
         this.buttonMenu.draw();
         
         if(this.buttonMenu.isPressed(mouseX, mouseY)) {
@@ -193,40 +186,42 @@ class Interface {
         
         for(Button button : this.buttons) {
             button.draw();
+            
             if(button.isPressed(mouseX, mouseY)) {
-                noStroke();
-                this.space = new Space(button.content, this.db);
-                this.skybox = createShape(SPHERE, 6E3);
-                this.skybox.setTexture(this.space.getSkybox());
-                this.skybox.rotateY(HALF_PI);
-                
-                this.context = 2;
-                this.drawBackground();
+                for(Button b : this.buttons)
+                    b.deactivate();
+                button.activate();
             }
         }
-    }
-    
-    private void chooseWorldEditor() {
-        this.drawBackground();
         
-        this.buttonMenu.draw();
-        
-        if(this.buttonMenu.isPressed(mouseX, mouseY)) {
-            this.context = 0;
-            this.drawBackground();
+        if(this.buttonSingleplayer.isPressed(mouseX, mouseY)) {
+            for(Button button : this.buttons) {
+                if(button.isActive()) {
+                    noStroke();
+                    this.space = new Space(button.content, this.db);
+                    this.skybox = createShape(SPHERE, 6E3);
+                    this.skybox.setTexture(this.space.getSkybox());
+                    this.skybox.rotateY(HALF_PI);
+                    
+                    this.context = 2;
+                    this.drawBackground();
+                    
+                    break;
+                }
+            }
         }
-        
-        for(Button button : this.buttons) {
-            button.draw();
-            if(button.isPressed(mouseX, mouseY)) {
-                noStroke();
-                this.space = new Space(button.content, this.db);
-                this.skybox = createShape(SPHERE, 6E3);
-                this.skybox.setTexture(this.space.getSkybox());
-                this.skybox.rotateY(HALF_PI);
-                
-                this.context = 3;
-                this.drawBackground();
+        else if(this.buttonMultiplayer.isPressed(mouseX, mouseY)) {
+            for(Button button : this.buttons) {
+                if(button.isActive()) {
+                    
+                }
+            }
+        }
+        else if(this.buttonEditor.isPressed(mouseX, mouseY)) {
+            for(Button button : this.buttons) {
+                if(button.isActive()) {
+                    
+                }
             }
         }
     }
@@ -270,6 +265,7 @@ class Interface {
     private class Button {
         private float x, y, w, h;
         private String content;
+        private boolean active;
         
         
         public Button(float x, float y, float w, float h, String content) {
@@ -278,22 +274,19 @@ class Interface {
             this.w = w;
             this.h = h;
             this.content = content;
+            this.active = false;
         }
         
         public boolean isPressed(float mx, float my) {
-            if(mousePressed && mx >= x && mx <= x + w && my >= y && my <= y + h) {
-                if(abs(mx - px) >= 8 || abs(my - py) >= 8) {
-                    px = mx;
-                    py = my;
-                    return true;
-                }
-                return false;
-            }
-            return false;
+            
+            return (mousePressed && mx >= x && mx <= x + w && my >= y && my <= y + h);
         }
         
         public void draw() {
-            fill(0, 127);
+            if(this.active)
+                fill(255, 127);
+            else
+                fill(0, 127);
             stroke(255);
             strokeWeight(this.h / 10);
             rect(this.x, this.y, this.w, this.h, this.h / 2, this.h / 2, this.h / 2, this.h / 2);
@@ -303,6 +296,18 @@ class Interface {
             textSize(16);
             text(this.content, this.x + (this.w - textWidth(this.content)) / 2, this.y + this.h / 2);
             noFill();
+        }
+        
+        public void activate() {
+            this.active = true;
+        }
+        
+        public void deactivate() {
+            this.active = false;
+        }
+        
+        public boolean isActive() {
+            return this.active;
         }
     }
 }
