@@ -5,10 +5,18 @@
   Malovanyi Denys Olehovych
 ***/
 
+import java.awt.Robot;
+import java.awt.AWTException;
+
+
 class Interface {
     private int context;
     
     private float cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ;
+    private float cameraAngleX, cameraAngleY;
+    private float cameraSensivity, cameraSpeed;
+    private float cameraZoom;
+    private Robot robot;
     
     private Database db;
     
@@ -35,6 +43,14 @@ class Interface {
         this.cameraCenterZ = 1;
         this.cameraUpX = this.cameraUpZ = 0;
         this.cameraUpY = 1;
+        this.cameraAngleX = this.cameraAngleY = 0;
+        this.cameraSensivity = 2E1;
+        this.cameraSpeed = 1E2;
+        this.cameraZoom = 1;
+        try {
+            this.robot = new Robot();
+        }
+        catch(AWTException e) {}
         
         w = width / 8;
         h = height / 16;
@@ -82,12 +98,6 @@ class Interface {
                 this.context = 0;
                 break;
         }
-        
-        stroke(255);
-        strokeWeight(2);
-        fill(0, 127);
-        circle(mouseX, mouseY, 8);
-        noFill();
     }
     
     private void menu() {
@@ -96,11 +106,12 @@ class Interface {
         buttonCredits.draw();
         buttonPlay.draw();
         
-        if(this.buttonCredits.isPressed(mouseX, mouseY)) {
+        if(this.buttonCredits.isPressed()) {
             this.context = 1;
-            this.drawBackground();
         }
-        else if(this.buttonPlay.isPressed(mouseX, mouseY)) {
+        else if(this.buttonPlay.isPressed()) {
+            this.drawBackground();
+            
             ArrayList<Button> buttonsList = new ArrayList<Button>();
             float w = width / 2, h = height / 16;
             float x = (width - w) / 2, y0 = height / 8;
@@ -110,7 +121,6 @@ class Interface {
             this.buttons = buttonsList.toArray(this.buttons);
             
             this.context = 4;
-            this.drawBackground();
         }
     }
     
@@ -119,10 +129,8 @@ class Interface {
         
         this.buttonMenu.draw();
         
-        if(this.buttonMenu.isPressed(mouseX, mouseY)) {
+        if(this.buttonMenu.isPressed())
             this.context = 0;
-            this.drawBackground();
-        }
         
         float w = width / 10, h = height / 10;
         fill(0, 127);
@@ -142,7 +150,7 @@ class Interface {
         
         background(0);
         beginCamera();
-        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX, this.cameraCenterY, this.cameraCenterZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
+        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX + this.cameraPosX, this.cameraCenterY + this.cameraPosY, this.cameraCenterZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
         
         translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
         shape(this.skybox, 0, 0);
@@ -158,7 +166,7 @@ class Interface {
     private void editor() {
         background(0);
         beginCamera();
-        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX, this.cameraCenterY, this.cameraCenterZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
+        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX + this.cameraPosX, this.cameraCenterY + this.cameraPosY, this.cameraCenterZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
         
         translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
         shape(this.skybox, 0, 0);
@@ -179,48 +187,58 @@ class Interface {
         this.buttonEditor.draw();
         this.buttonMenu.draw();
         
-        if(this.buttonMenu.isPressed(mouseX, mouseY)) {
+        if(this.buttonMenu.isPressed())
             this.context = 0;
-            this.drawBackground();
-        }
         
         for(Button button : this.buttons) {
             button.draw();
             
-            if(button.isPressed(mouseX, mouseY)) {
+            if(button.isPressed()) {
                 for(Button b : this.buttons)
                     b.deactivate();
                 button.activate();
             }
         }
         
-        if(this.buttonSingleplayer.isPressed(mouseX, mouseY)) {
+        if(this.buttonSingleplayer.isPressed()) {
             for(Button button : this.buttons) {
                 if(button.isActive()) {
+                    this.drawBackground();
+                    
                     noStroke();
+                    fill(255);
                     this.space = new Space(button.content, this.db);
                     this.skybox = createShape(SPHERE, 6E3);
                     this.skybox.setTexture(this.space.getSkybox());
                     this.skybox.rotateY(HALF_PI);
                     
+                    this.robot.mouseMove((int)(width / 2), (int)(height / 2));
+                    
                     this.context = 2;
-                    this.drawBackground();
                     
                     break;
                 }
             }
         }
-        else if(this.buttonMultiplayer.isPressed(mouseX, mouseY)) {
+        else if(this.buttonMultiplayer.isPressed()) {
             for(Button button : this.buttons) {
                 if(button.isActive()) {
+                    this.drawBackground();
                     
+                    this.robot.mouseMove((int)(width / 2), (int)(height / 2));
+                    
+                    break;
                 }
             }
         }
-        else if(this.buttonEditor.isPressed(mouseX, mouseY)) {
+        else if(this.buttonEditor.isPressed()) {
             for(Button button : this.buttons) {
                 if(button.isActive()) {
+                    this.drawBackground();
                     
+                    this.robot.mouseMove((int)(width / 2), (int)(height / 2));
+                    
+                    break;
                 }
             }
         }
@@ -228,6 +246,7 @@ class Interface {
     
     private void drawBackground() {
         camera();
+        background(0);
         
         image(this.buffer[0], -width + this.xo, -height + this.yo);
         image(this.buffer[0], this.xo, -height + this.yo);
@@ -251,10 +270,68 @@ class Interface {
                 this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
             }
         }
+        
+        stroke(255);
+        strokeWeight(2);
+        fill(0, 127);
+        circle(mouseX, mouseY, 8);
+        noFill();
     }
     
     private void interfacePlay() {
+        float w = width / 2, h = height / 2;
         
+        this.cameraAngleX -= radians(mouseX - w) / this.cameraSensivity;
+        this.cameraAngleY += radians(mouseY - h) / this.cameraSensivity;
+        if(this.cameraAngleY <= -HALF_PI)
+            this.cameraAngleY = -HALF_PI * 0.9999999;
+        else if(this.cameraAngleY >= HALF_PI)
+            this.cameraAngleY = HALF_PI * 0.9999999;
+        
+        this.cameraCenterX = cos(this.cameraAngleY) * sin(this.cameraAngleX);
+        this.cameraCenterY = sin(this.cameraAngleY);
+        this.cameraCenterZ = cos(this.cameraAngleY) * cos(this.cameraAngleX);
+        
+        this.robot.mouseMove((int)w, (int)h);
+        
+        PVector speed;
+        
+        if(keyPressed) {
+            if(key != CODED) {
+                switch(key) {
+                    case 'w':
+                        this.cameraPosX += this.cameraCenterX * this.cameraSpeed;
+                        this.cameraPosY += this.cameraCenterY * this.cameraSpeed;
+                        this.cameraPosZ += this.cameraCenterZ * this.cameraSpeed;
+                        break;
+                    case 's':
+                        this.cameraPosX -= this.cameraCenterX * this.cameraSpeed;
+                        this.cameraPosY -= this.cameraCenterY * this.cameraSpeed;
+                        this.cameraPosZ -= this.cameraCenterZ * this.cameraSpeed;
+                        break;
+                    case 'd':
+                        speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraCenterX * this.cameraUpZ, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
+                        speed.normalize();
+                        this.cameraPosX += speed.x * this.cameraSpeed;
+                        this.cameraPosY += speed.y * this.cameraSpeed;
+                        this.cameraPosZ += speed.z * this.cameraSpeed;
+                        break;
+                    case 'a':
+                        speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraCenterX * this.cameraUpZ, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
+                        speed.normalize();
+                        this.cameraPosX -= speed.x * this.cameraSpeed;
+                        this.cameraPosY -= speed.y * this.cameraSpeed;
+                        this.cameraPosZ -= speed.z * this.cameraSpeed;
+                        break;
+                    case 'q':
+                        
+                        break;
+                    case 'e':
+                        
+                        break;
+                }
+            }
+        }
     }
     
     private void interfaceEditor() {
@@ -277,9 +354,8 @@ class Interface {
             this.active = false;
         }
         
-        public boolean isPressed(float mx, float my) {
-            
-            return (mousePressed && mx >= x && mx <= x + w && my >= y && my <= y + h);
+        public boolean isPressed() {
+            return (mousePressed && mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h);
         }
         
         public void draw() {
