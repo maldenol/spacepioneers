@@ -13,9 +13,10 @@ class Interface {
     private int context;
     
     private float cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ;
-    private float cameraAngleX, cameraAngleY;
+    private float cameraAngleX, cameraAngleY, cameraAngleZ;
     private float cameraSensivity, cameraSpeed;
     private float cameraZoom;
+    
     private Robot robot;
     
     private Database db;
@@ -43,27 +44,27 @@ class Interface {
         this.cameraCenterZ = 1;
         this.cameraUpX = this.cameraUpZ = 0;
         this.cameraUpY = 1;
-        this.cameraAngleX = this.cameraAngleY = 0;
+        this.cameraAngleX = this.cameraAngleY = cameraAngleZ = 0;
         this.cameraSensivity = 2E1;
         this.cameraSpeed = 1E2;
         this.cameraZoom = 1;
+        
         try {
             this.robot = new Robot();
-        }
-        catch(AWTException e) {}
+        } catch(AWTException e) {}
         
         w = width / 8;
         h = height / 16;
         x = (width - w) / 2;
-        this.buttonMenu = new Button(0, 0, w, h, "MAIN MENU");
+        this.buttonMenu = new Button(h / 10, h / 10, w, h, "MAIN MENU");
         this.buttonPlay = new Button(x, height / 5 * 2.5 - h * 2, w, h, "PLAY");
         this.buttonCredits = new Button(x, height / 5 * 3.5 - h * 2, w, h, "CREDITS");
         w = width / 8;
         h = height / 8;
         x = width - w;
-        this.buttonSingleplayer = new Button(x, height / 5 * 2 - h * 3 / 2, w, h, "SINGLEPLAYER");
-        this.buttonMultiplayer = new Button(x, height / 5 * 3 - h * 3 / 2, w, h, "MULTIPLAYER");
-        this.buttonEditor = new Button(x, height / 5 * 4 - h * 3 / 2, w, h, "EDITOR");
+        this.buttonSingleplayer = new Button(x - h / 10, height / 5 * 2 - h * 3 / 2, w, h, "SINGLEPLAYER");
+        this.buttonMultiplayer = new Button(x - h / 10, height / 5 * 3 - h * 3 / 2, w, h, "MULTIPLAYER");
+        this.buttonEditor = new Button(x - h / 10, height / 5 * 4 - h * 3 / 2, w, h, "EDITOR");
         
         this.xo = this.yo = this.swap = this.textureIndex = 0;
         this.textureIndexMax = this.db.getTextures().length;
@@ -296,40 +297,58 @@ class Interface {
         
         PVector speed;
         
-        if(keyPressed) {
-            if(key != CODED) {
-                switch(key) {
-                    case 'w':
-                        this.cameraPosX += this.cameraCenterX * this.cameraSpeed;
-                        this.cameraPosY += this.cameraCenterY * this.cameraSpeed;
-                        this.cameraPosZ += this.cameraCenterZ * this.cameraSpeed;
-                        break;
-                    case 's':
-                        this.cameraPosX -= this.cameraCenterX * this.cameraSpeed;
-                        this.cameraPosY -= this.cameraCenterY * this.cameraSpeed;
-                        this.cameraPosZ -= this.cameraCenterZ * this.cameraSpeed;
-                        break;
-                    case 'd':
-                        speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraCenterX * this.cameraUpZ, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
-                        speed.normalize();
-                        this.cameraPosX += speed.x * this.cameraSpeed;
-                        this.cameraPosY += speed.y * this.cameraSpeed;
-                        this.cameraPosZ += speed.z * this.cameraSpeed;
-                        break;
-                    case 'a':
-                        speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraCenterX * this.cameraUpZ, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
-                        speed.normalize();
-                        this.cameraPosX -= speed.x * this.cameraSpeed;
-                        this.cameraPosY -= speed.y * this.cameraSpeed;
-                        this.cameraPosZ -= speed.z * this.cameraSpeed;
-                        break;
-                    case 'q':
-                        
-                        break;
-                    case 'e':
-                        
-                        break;
-                }
+        if(keyPressed) { // move forward
+            if(key == 'w') {
+                this.cameraPosX += this.cameraCenterX * this.cameraSpeed;
+                this.cameraPosY += this.cameraCenterY * this.cameraSpeed;
+                this.cameraPosZ += this.cameraCenterZ * this.cameraSpeed;
+            }
+            if(key == 's') { // move backward
+                this.cameraPosX -= this.cameraCenterX * this.cameraSpeed;
+                this.cameraPosY -= this.cameraCenterY * this.cameraSpeed;
+                this.cameraPosZ -= this.cameraCenterZ * this.cameraSpeed;
+            }
+            if(key == 'd') { // move right
+                speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraUpZ * this.cameraCenterX, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
+                speed.normalize();
+                this.cameraPosX += speed.x * this.cameraSpeed;
+                this.cameraPosY += speed.y * this.cameraSpeed;
+                this.cameraPosZ += speed.z * this.cameraSpeed;
+            }
+            if(key == 'a') { // move left
+                speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraUpZ * this.cameraCenterX, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
+                speed.normalize();
+                this.cameraPosX -= speed.x * this.cameraSpeed;
+                this.cameraPosY -= speed.y * this.cameraSpeed;
+                this.cameraPosZ -= speed.z * this.cameraSpeed;
+            }
+            if(key == ' ') { // move up
+                this.cameraPosX -= this.cameraUpX * this.cameraSpeed;
+                this.cameraPosY -= this.cameraUpY * this.cameraSpeed;
+                this.cameraPosZ -= this.cameraUpZ * this.cameraSpeed;
+            }
+            if(keyCode == SHIFT) { // move down
+                this.cameraPosX += this.cameraUpX * this.cameraSpeed;
+                this.cameraPosY += this.cameraUpY * this.cameraSpeed;
+                this.cameraPosZ += this.cameraUpZ * this.cameraSpeed;
+            }
+            if(key == 'q') { // spin left
+                this.cameraAngleZ += TWO_PI / FPS;
+                this.cameraUpX = sin(this.cameraAngleZ);
+                this.cameraUpY = cos(this.cameraAngleZ);
+                this.cameraUpZ = sin(this.cameraAngleZ);
+            }
+            if(key == 'e') { // spin right
+                this.cameraAngleZ -= TWO_PI / FPS;
+                this.cameraUpX = sin(this.cameraAngleZ);
+                this.cameraUpY = cos(this.cameraAngleZ);
+                this.cameraUpZ = sin(this.cameraAngleZ);
+            }
+            if(key == 'r') { // spin back
+                this.cameraAngleZ = 0;
+                this.cameraUpX = sin(this.cameraAngleZ);
+                this.cameraUpY = cos(this.cameraAngleZ);
+                this.cameraUpZ = sin(this.cameraAngleZ);
             }
         }
     }
