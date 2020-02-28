@@ -2,11 +2,16 @@
   "Space Pioneers"
   Interface class
       Button class
+      SoundtrackThread class that extends Thread
   Malovanyi Denys Olehovych
 ***/
 
 import java.awt.Robot;
 import java.awt.AWTException;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 
 
 class Interface {
@@ -23,17 +28,27 @@ class Interface {
     
     private Space space;
     private PShape skybox;
-    private Button buttonMenu, buttonCredits, buttonPlay, buttonSingleplayer, buttonMultiplayer, buttonEditor;
+    
+    private Button buttonMenu;
+    private Button buttonCredits, buttonPlay;
+    private Button buttonSingleplayer, buttonMultiplayer, buttonEditor;
+    private Button buttonHost, buttonConnect;
+    private Button fieldIP, fieldPort;
     private Button[] buttons;
+    
+    private boolean fieldPressed;
+    private char fieldLastChar;
     
     private PImage[] buffer;
     private int xo, yo, swap, textureIndex, textureIndexMax;
+    
+    private SoundtrackThread soundtrack;
     
     private String buttonCreditsContent;
     
     
     public Interface() {
-        float w, h, x;
+        float w, h, x, y0;
         
         this.context = 0;  
         
@@ -65,6 +80,17 @@ class Interface {
         this.buttonSingleplayer = new Button(x - h / 10, height / 5 * 2 - h * 3 / 2, w, h, "SINGLEPLAYER");
         this.buttonMultiplayer = new Button(x - h / 10, height / 5 * 3 - h * 3 / 2, w, h, "MULTIPLAYER");
         this.buttonEditor = new Button(x - h / 10, height / 5 * 4 - h * 3 / 2, w, h, "EDITOR");
+        w = width / 4;
+        h = height / 16;
+        x = (width - w) / 2;
+        y0 = height / 2 - h * 2;
+        this.fieldIP = new Button(x, y0 + h * 0, w, h, "0.0.0.0");
+        this.fieldPort = new Button(x, y0 + h * 1, w, h, "16384");
+        this.buttonHost = new Button(x, y0 + h * 2, w, h, "HOST");
+        this.buttonConnect = new Button(x, y0 + h * 3, w, h, "CONNECT");
+        
+        this.fieldPressed = false;
+        this.fieldLastChar = ' ';
         
         this.xo = this.yo = this.swap = this.textureIndex = 0;
         this.textureIndexMax = this.db.getTextures().length;
@@ -79,6 +105,11 @@ class Interface {
     }
     
     public void draw() {
+        if(this.soundtrack == null) {
+            this.soundtrack = new SoundtrackThread(this.db);
+            this.soundtrack.start();
+        }
+        
         switch(this.context) {
             case 0:
                 this.menu();
@@ -95,6 +126,9 @@ class Interface {
             case 4:
                 this.chooseWorld();
                 break;
+            case 5:
+                this.chooseHost();
+                break;
             default:
                 this.context = 0;
                 break;
@@ -109,8 +143,7 @@ class Interface {
         
         if(this.buttonCredits.isPressed()) {
             this.context = 1;
-        }
-        else if(this.buttonPlay.isPressed()) {
+        } else if(this.buttonPlay.isPressed()) {
             this.drawBackground();
             
             ArrayList<Button> buttonsList = new ArrayList<Button>();
@@ -129,7 +162,6 @@ class Interface {
         this.drawBackground();
         
         this.buttonMenu.draw();
-        
         if(this.buttonMenu.isPressed())
             this.context = 0;
         
@@ -183,13 +215,13 @@ class Interface {
     private void chooseWorld() {
         this.drawBackground();
         
+        this.buttonMenu.draw();
+        if(this.buttonMenu.isPressed())
+            this.context = 0;
+        
         this.buttonSingleplayer.draw();
         this.buttonMultiplayer.draw();
         this.buttonEditor.draw();
-        this.buttonMenu.draw();
-        
-        if(this.buttonMenu.isPressed())
-            this.context = 0;
         
         for(Button button : this.buttons) {
             button.draw();
@@ -220,19 +252,19 @@ class Interface {
                     break;
                 }
             }
-        }
-        else if(this.buttonMultiplayer.isPressed()) {
+        } else if(this.buttonMultiplayer.isPressed()) {
             for(Button button : this.buttons) {
                 if(button.isActive()) {
                     this.drawBackground();
                     
                     this.robot.mouseMove((int)(width / 2), (int)(height / 2));
                     
+                    this.context = 5;
+                    
                     break;
                 }
             }
-        }
-        else if(this.buttonEditor.isPressed()) {
+        } else if(this.buttonEditor.isPressed()) {
             for(Button button : this.buttons) {
                 if(button.isActive()) {
                     this.drawBackground();
@@ -245,38 +277,55 @@ class Interface {
         }
     }
     
-    private void drawBackground() {
-        camera();
-        background(0);
+    private void chooseHost() {
+        this.drawBackground();
         
-        image(this.buffer[0], -width + this.xo, -height + this.yo);
-        image(this.buffer[0], this.xo, -height + this.yo);
-        image(this.buffer[1], -width + this.xo, this.yo);
-        image(this.buffer[1], this.xo, this.yo);
+        this.buttonMenu.draw();
+        if(this.buttonMenu.isPressed())
+            this.context = 0;
         
-        this.xo = (this.xo + 1) % width;
+        this.buttonHost.draw();
+        this.buttonConnect.draw();
+        this.fieldIP.draw();
+        this.fieldPort.draw();
         
-        if(this.xo == 0 && this.swap == 0)
-            this.swap = 1;
-        
-        if(this.swap == 1) {
-            this.yo = (this.yo + height / FPS) % height;
+        if(this.fieldIP.isPressed()) {
+            this.fieldIP.activate();
+            this.fieldPort.deactivate();
+        } else if(this.fieldPort.isPressed()) {
+            this.fieldIP.deactivate();
+            this.fieldPort.activate();
+        } else if(this.buttonHost.isPressed()) {
             
-            if(this.yo == 0) {
-                this.swap = 0;
-                
-                this.buffer[1] = this.buffer[0];
-                this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.textureIndex]);
-                this.buffer[0].resize(width, height);
-                this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
-            }
+        } else if(this.buttonConnect.isPressed()) {
+            
         }
         
-        stroke(255);
-        strokeWeight(2);
-        fill(0, 127);
-        circle(mouseX, mouseY, 8);
-        noFill();
+        if(this.fieldIP.isActive()) {
+            if(keyPressed) {
+                if(!this.fieldPressed || this.fieldLastChar != key) {
+                    if(keyCode == BACKSPACE)
+                        this.fieldIP.pop();
+                    else if(key != CODED)
+                        this.fieldIP.push(key);
+                    this.fieldLastChar = key;
+                }
+                this.fieldPressed = true;
+            } else
+                this.fieldPressed = false;
+        } else if(this.fieldPort.isActive()) {
+            if(keyPressed) {
+                if(!this.fieldPressed || this.fieldLastChar != key) {
+                    if(keyCode == BACKSPACE)
+                        this.fieldPort.pop();
+                    else if(key != CODED)
+                        this.fieldPort.push(key);
+                    this.fieldLastChar = key;
+                }
+                this.fieldPressed = true;
+            } else
+                this.fieldPressed = false;
+        }
     }
     
     private void interfacePlay() {
@@ -357,6 +406,40 @@ class Interface {
         
     }
     
+    private void drawBackground() {
+        camera();
+        background(0);
+        
+        image(this.buffer[0], -width + this.xo, -height + this.yo);
+        image(this.buffer[0], this.xo, -height + this.yo);
+        image(this.buffer[1], -width + this.xo, this.yo);
+        image(this.buffer[1], this.xo, this.yo);
+        
+        this.xo = (this.xo + 1) % width;
+        
+        if(this.xo == 0 && this.swap == 0)
+            this.swap = 1;
+        
+        if(this.swap == 1) {
+            this.yo = (this.yo + height / FPS) % height;
+            
+            if(this.yo == 0) {
+                this.swap = 0;
+                
+                this.buffer[1] = this.buffer[0];
+                this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.textureIndex]);
+                this.buffer[0].resize(width, height);
+                this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
+            }
+        }
+        
+        stroke(255);
+        strokeWeight(2);
+        fill(0, 127);
+        circle(mouseX, mouseY, 8);
+        noFill();
+    }
+    
     
     private class Button {
         private float x, y, w, h;
@@ -373,8 +456,9 @@ class Interface {
             this.active = false;
         }
         
+        
         public boolean isPressed() {
-            return (mousePressed && mouseX >= x && mouseX <= x + w && mouseY >= y && mouseY <= y + h);
+            return (mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
         }
         
         public void draw() {
@@ -385,7 +469,10 @@ class Interface {
             stroke(255);
             strokeWeight(this.h / 10);
             rect(this.x, this.y, this.w, this.h, this.h / 2, this.h / 2, this.h / 2, this.h / 2);
-            fill(255);
+            if(this.active)
+                fill(0);
+            else
+                fill(255);
             stroke(0);
             strokeWeight(1);
             textSize(16);
@@ -403,6 +490,39 @@ class Interface {
         
         public boolean isActive() {
             return this.active;
+        }
+        
+        public void pop() {
+             if(this.content.length() >= 1)
+                 this.content = this.content.substring(0, this.content.length() - 1);
+        }
+        
+        public void push(char character) {
+            this.content += character;
+        }
+    }
+    
+    
+    public class SoundtrackThread extends Thread {
+        private Database db;
+        private int soundIndex, soundIndexMax;
+        
+        public SoundtrackThread(Database db) {
+            this.db = db;
+            this.soundIndexMax = this.db.getSounds().length;
+            this.soundIndex = 0;
+        }
+        
+        @Override
+        public void run() {
+            while(true)
+                try {
+                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[soundIndex]));
+                    Clip clip = AudioSystem.getClip();
+                    clip.open(audioInputStream);
+                    clip.start();
+                    this.soundIndex = (this.soundIndex + 1) % this.soundIndexMax;
+                } catch(Exception e) {println(e);}
         }
     }
 }
