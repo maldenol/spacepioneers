@@ -1,8 +1,10 @@
 /***
   "Space Pioneers"
   Interface class
+      Camera class
       Button class
       SoundtrackThread class that extends Thread
+      TextureLoaderThread class that extends Thread
   Malovanyi Denys Olehovych
 ***/
 
@@ -17,10 +19,11 @@ import javax.sound.sampled.Clip;
 class Interface {
     private int context;
     
-    private float cameraPosX, cameraPosY, cameraPosZ, cameraCenterX, cameraCenterY, cameraCenterZ, cameraUpX, cameraUpY, cameraUpZ;
+    private float cameraPosX, cameraPosY, cameraPosZ, cameraForwardX, cameraForwardY, cameraForwardZ, cameraUpX, cameraUpY, cameraUpZ, cameraRightX, cameraRightY, cameraRightZ;
     private float cameraAngleX, cameraAngleY, cameraAngleZ;
     private float cameraSensivity, cameraSpeed;
     private float cameraZoom;
+    private int cameraMode;
     
     private Robot robot;
     
@@ -55,14 +58,17 @@ class Interface {
         this.db = new Database();
         
         this.cameraPosX = this.cameraPosY = this.cameraPosZ = 0;
-        this.cameraCenterX = this.cameraCenterY = 0;
-        this.cameraCenterZ = 1;
+        this.cameraForwardX = this.cameraForwardY = 0;
+        this.cameraForwardZ = 1;
         this.cameraUpX = this.cameraUpZ = 0;
         this.cameraUpY = 1;
+        this.cameraRightX = 1;
+        this.cameraRightY = this.cameraRightZ = 0;
         this.cameraAngleX = this.cameraAngleY = cameraAngleZ = 0;
-        this.cameraSensivity = 2E1;
+        this.cameraSensivity = 4E-2;
         this.cameraSpeed = 1E2;
         this.cameraZoom = 1;
+        this.cameraMode = 0;
         
         try {
             this.robot = new Robot();
@@ -101,15 +107,12 @@ class Interface {
         this.buffer[0].resize(width, height);
         this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
         
+        this.soundtrack = new SoundtrackThread(this.db);
+        
         this.buttonCreditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
     }
     
     public void draw() {
-        if(this.soundtrack == null) {
-            this.soundtrack = new SoundtrackThread(this.db);
-            this.soundtrack.start();
-        }
-        
         switch(this.context) {
             case 0:
                 this.menu();
@@ -183,7 +186,7 @@ class Interface {
         
         background(0);
         beginCamera();
-        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX + this.cameraPosX, this.cameraCenterY + this.cameraPosY, this.cameraCenterZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
+        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraForwardX + this.cameraPosX, this.cameraForwardY + this.cameraPosY, this.cameraForwardZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
         
         translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
         shape(this.skybox, 0, 0);
@@ -199,7 +202,7 @@ class Interface {
     private void editor() {
         background(0);
         beginCamera();
-        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraCenterX + this.cameraPosX, this.cameraCenterY + this.cameraPosY, this.cameraCenterZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
+        camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraForwardX + this.cameraPosX, this.cameraForwardY + this.cameraPosY, this.cameraForwardZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
         
         translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
         shape(this.skybox, 0, 0);
@@ -240,12 +243,14 @@ class Interface {
                     
                     noStroke();
                     fill(255);
-                    this.space = new Space(button.content, this.db);
+                    this.space = new Space(button.getContent(), this.db);
                     this.skybox = createShape(SPHERE, 6E3);
                     this.skybox.setTexture(this.space.getSkybox());
                     this.skybox.rotateY(HALF_PI);
                     
                     this.robot.mouseMove((int)(width / 2), (int)(height / 2));
+                    
+                    this.soundtrack.kill();
                     
                     this.context = 2;
                     
@@ -270,6 +275,8 @@ class Interface {
                     this.drawBackground();
                     
                     this.robot.mouseMove((int)(width / 2), (int)(height / 2));
+                    
+                    this.soundtrack.kill();
                     
                     break;
                 }
@@ -331,45 +338,54 @@ class Interface {
     private void interfacePlay() {
         float w = width / 2, h = height / 2;
         
-        this.cameraAngleX -= radians(mouseX - w) / this.cameraSensivity;
-        this.cameraAngleY += radians(mouseY - h) / this.cameraSensivity;
-        if(this.cameraAngleY <= -HALF_PI)
-            this.cameraAngleY = -HALF_PI * 0.9999999;
-        else if(this.cameraAngleY >= HALF_PI)
-            this.cameraAngleY = HALF_PI * 0.9999999;
+        if(mouseX != pmouseX || mouseY != pmouseY) {
+            this.cameraAngleY -= (radians(mouseX - w) * cos(this.cameraAngleZ) - radians(mouseY - h) * sin(this.cameraAngleZ)) * this.cameraSensivity;
+            this.cameraAngleX += (radians(mouseY - h) * cos(this.cameraAngleZ) + radians(mouseX - w) * sin(this.cameraAngleZ)) * this.cameraSensivity;
+            if(this.cameraAngleX <= -HALF_PI * 0.9)
+                this.cameraAngleX = -HALF_PI * 0.9;
+            else if(this.cameraAngleX >= HALF_PI * 0.9)
+                this.cameraAngleX = HALF_PI * 0.9;
+            this.robot.mouseMove((int)w, (int)h);
+            
+            this.cameraForwardX = cos(this.cameraAngleX) * sin(this.cameraAngleY);
+            this.cameraForwardY = sin(this.cameraAngleX);
+            this.cameraForwardZ = cos(this.cameraAngleX) * cos(this.cameraAngleY);
+            
+            PVector right = new PVector(this.cameraForwardY * this.cameraUpZ - this.cameraForwardZ * this.cameraUpY, this.cameraForwardX * this.cameraUpZ - this.cameraUpZ * this.cameraForwardX, this.cameraForwardX * this.cameraUpY - this.cameraForwardY * this.cameraUpX);
+            right.normalize();
+            this.cameraRightX = right.x;
+            this.cameraRightY = right.y;
+            this.cameraRightZ = right.z;
+            
+            /*
+            PVector up = new PVector(this.cameraForwardY * this.cameraRightZ - this.cameraForwardZ * this.cameraRightY, this.cameraForwardX * this.cameraRightZ - this.cameraRightZ * this.cameraForwardX, this.cameraForwardX * this.cameraRightY - this.cameraForwardY * this.cameraRightX);
+            up.normalize();
+            this.cameraUpX = -up.x;
+            this.cameraUpY = -up.y;
+            this.cameraUpZ = -up.z;
+            */
+        }
         
-        this.cameraCenterX = cos(this.cameraAngleY) * sin(this.cameraAngleX);
-        this.cameraCenterY = sin(this.cameraAngleY);
-        this.cameraCenterZ = cos(this.cameraAngleY) * cos(this.cameraAngleX);
-        
-        this.robot.mouseMove((int)w, (int)h);
-        
-        PVector speed;
-        
-        if(keyPressed) { // move forward
-            if(key == 'w') {
-                this.cameraPosX += this.cameraCenterX * this.cameraSpeed;
-                this.cameraPosY += this.cameraCenterY * this.cameraSpeed;
-                this.cameraPosZ += this.cameraCenterZ * this.cameraSpeed;
+        if(keyPressed) {
+            if(key == 'w') { // move forward
+                this.cameraPosX += this.cameraForwardX * this.cameraSpeed;
+                this.cameraPosY += this.cameraForwardY * this.cameraSpeed;
+                this.cameraPosZ += this.cameraForwardZ * this.cameraSpeed;
             }
             if(key == 's') { // move backward
-                this.cameraPosX -= this.cameraCenterX * this.cameraSpeed;
-                this.cameraPosY -= this.cameraCenterY * this.cameraSpeed;
-                this.cameraPosZ -= this.cameraCenterZ * this.cameraSpeed;
+                this.cameraPosX -= this.cameraForwardX * this.cameraSpeed;
+                this.cameraPosY -= this.cameraForwardY * this.cameraSpeed;
+                this.cameraPosZ -= this.cameraForwardZ * this.cameraSpeed;
             }
             if(key == 'd') { // move right
-                speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraUpZ * this.cameraCenterX, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
-                speed.normalize();
-                this.cameraPosX += speed.x * this.cameraSpeed;
-                this.cameraPosY += speed.y * this.cameraSpeed;
-                this.cameraPosZ += speed.z * this.cameraSpeed;
+                this.cameraPosX += this.cameraRightX * this.cameraSpeed;
+                this.cameraPosY += this.cameraRightY * this.cameraSpeed;
+                this.cameraPosZ += this.cameraRightZ * this.cameraSpeed;
             }
             if(key == 'a') { // move left
-                speed = new PVector(this.cameraCenterY * this.cameraUpZ - this.cameraCenterZ * this.cameraUpY, this.cameraCenterX * this.cameraUpZ - this.cameraUpZ * this.cameraCenterX, this.cameraCenterX * this.cameraUpY - this.cameraCenterY * this.cameraUpX);
-                speed.normalize();
-                this.cameraPosX -= speed.x * this.cameraSpeed;
-                this.cameraPosY -= speed.y * this.cameraSpeed;
-                this.cameraPosZ -= speed.z * this.cameraSpeed;
+                this.cameraPosX -= this.cameraRightX * this.cameraSpeed;
+                this.cameraPosY -= this.cameraRightY * this.cameraSpeed;
+                this.cameraPosZ -= this.cameraRightZ * this.cameraSpeed;
             }
             if(key == ' ') { // move up
                 this.cameraPosX -= this.cameraUpX * this.cameraSpeed;
@@ -382,13 +398,13 @@ class Interface {
                 this.cameraPosZ += this.cameraUpZ * this.cameraSpeed;
             }
             if(key == 'q') { // spin left
-                this.cameraAngleZ += TWO_PI / FPS;
+                this.cameraAngleZ -= TWO_PI / FPS;
                 this.cameraUpX = sin(this.cameraAngleZ);
                 this.cameraUpY = cos(this.cameraAngleZ);
                 this.cameraUpZ = sin(this.cameraAngleZ);
             }
             if(key == 'e') { // spin right
-                this.cameraAngleZ -= TWO_PI / FPS;
+                this.cameraAngleZ += TWO_PI / FPS;
                 this.cameraUpX = sin(this.cameraAngleZ);
                 this.cameraUpY = cos(this.cameraAngleZ);
                 this.cameraUpZ = sin(this.cameraAngleZ);
@@ -410,8 +426,10 @@ class Interface {
         camera();
         background(0);
         
-        image(this.buffer[0], -width + this.xo, -height + this.yo);
-        image(this.buffer[0], this.xo, -height + this.yo);
+        if(swap == 1) {
+            image(this.buffer[0], -width + this.xo, -height + this.yo);
+            image(this.buffer[0], this.xo, -height + this.yo);
+        }
         image(this.buffer[1], -width + this.xo, this.yo);
         image(this.buffer[1], this.xo, this.yo);
         
@@ -438,8 +456,24 @@ class Interface {
         fill(0, 127);
         circle(mouseX, mouseY, 8);
         noFill();
+        
+        if(this.soundtrack.getState() == Thread.State.NEW)
+            this.soundtrack.start();
     }
     
+    
+    private class Camera {
+        private float cameraPosX, cameraPosY, cameraPosZ, cameraForwardX, cameraForwardY, cameraForwardZ, cameraUpX, cameraUpY, cameraUpZ, cameraRightX, cameraRightY, cameraRightZ;
+        private float cameraAngleX, cameraAngleY, cameraAngleZ;
+        private float cameraSensivity, cameraSpeed;
+        private float cameraZoom;
+        private int cameraMode;
+        
+        
+        public Camera() {
+            
+        }
+    }
     
     private class Button {
         private float x, y, w, h;
@@ -500,29 +534,52 @@ class Interface {
         public void push(char character) {
             this.content += character;
         }
+        
+        public String getContent() {
+            return this.content;
+        }
     }
     
     
     public class SoundtrackThread extends Thread {
         private Database db;
         private int soundIndex, soundIndexMax;
+        private boolean killed;
         
         public SoundtrackThread(Database db) {
             this.db = db;
-            this.soundIndexMax = this.db.getSounds().length;
-            this.soundIndex = 0;
+            this.killed = false;
         }
         
         @Override
         public void run() {
+            this.soundIndex = 0;
+            this.soundIndexMax = this.db.getSounds().length;
+            
+            AudioInputStream audioInputStream;
+            Clip clip;
+            
             while(true)
                 try {
-                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[soundIndex]));
-                    Clip clip = AudioSystem.getClip();
+                    audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[soundIndex]));
+                    this.soundIndex = (this.soundIndex + 1) % this.soundIndexMax;
+                    clip = AudioSystem.getClip();
                     clip.open(audioInputStream);
                     clip.start();
-                    this.soundIndex = (this.soundIndex + 1) % this.soundIndexMax;
-                } catch(Exception e) {println(e);}
+                    int wait = (int)(1E-3 * clip.getMicrosecondLength());
+                    for(int i = 0; i < FPS; i++) {
+                        if(this.killed) {
+                            clip.close();
+                            return;
+                        }
+                        delay(wait / FPS);
+                    }
+                    clip.close();
+                } catch(Exception e) {}
+        }
+        
+        public void kill() {
+            this.killed = true;
         }
     }
 }

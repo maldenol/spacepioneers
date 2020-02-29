@@ -64,13 +64,21 @@ class Database {
     }
     
     public PImage getTexture(String fileName) {
+        PImage result;
+        int ex;
         try {
-            return loadImage(sketchPath() + "/data/textures/" + fileName + ".jpg");
+            result = loadImage(sketchPath() + "/data/textures/" + fileName + ".jpg");
+            if(result == null)
+                ex = 1/0;
+            return result;
         } catch(Exception e) {
             try {
-                return loadImage(sketchPath() + "/data/textures/" + fileName + ".jpg");
+                result = loadImage(sketchPath() + "/data/textures/" + fileName + ".png");
+                if(result == null)
+                    ex = 1/0;
+                return result;
             } catch(Exception ee) {
-                return null;
+                return new PImage(1, 1, RGB);
             }
         }
     }
@@ -79,8 +87,8 @@ class Database {
         ArrayList<String> soundsList = new ArrayList<String>();
         
         for(String s : new File(sketchPath() + "/data/sounds/").list()) {
-            if(s.endsWith(".mp3"))
-                soundsList.add(s.replace(".mp3", ""));
+            if(s.endsWith(".wav"))
+                soundsList.add(s.replace(".wav", ""));
         }
         
         String[] soundsArr = new String[soundsList.size()];
@@ -95,7 +103,7 @@ class Database {
     
     public File getSound(String fileName) {
         try {
-            return new File(sketchPath() + "/data/sounds/" + fileName + ".mp3");
+            return new File(sketchPath() + "/data/sounds/" + fileName + ".wav");
         } catch(Exception e) {
             return null;
         }
