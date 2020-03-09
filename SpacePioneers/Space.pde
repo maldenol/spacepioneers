@@ -83,12 +83,11 @@ class Space {
             
             Body body = new Body(posX, posY, posZ, mass, radius);
             
+            body.setVel(velX, velY, velZ);
+            
             body.setAnglePos(angPosX, angPosY, angPosZ);
             body.setAnglePeriod(angPeriod);
             body.setTexture(texture);
-            
-            body.setPos(posX, posY, posZ);
-            body.setVel(velX, velY, velZ);
             
             if(orbitMass != 0.0) {
                 float[][] result = convertKeplerianToCartesian(semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
@@ -217,13 +216,12 @@ class Space {
         PVector vel1 = obj1.getVel().mult(mass1);
         PVector vel2 = obj2.getVel().mult(mass2);
         
-        float mass = mass1 + mass2;
         float volume = (pow(obj1.getRadius(), 3) + pow(obj2.getRadius(), 3)) * 4/3.0 * PI;
         float radius = pow(volume * 3/4.0 / PI, 1/3.0);
         
         vector.add(vel1);
         vector.add(vel2);
-        vector.div(mass);
+        vector.div(mass1 + mass2);
         
         if (mass1 >= mass2) {
             obj1.setVel(vector);

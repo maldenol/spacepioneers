@@ -29,7 +29,7 @@ class Interface {
     private PShape skybox;
     
     private Button buttonMenu;
-    private Button buttonCredits, buttonPlay;
+    private Button buttonCredits, buttonSettings, buttonPlay;
     private Button buttonSingleplayer, buttonMultiplayer, buttonEditor;
     private Button buttonHost, buttonConnect;
     private Button fieldIP, fieldPort;
@@ -39,13 +39,13 @@ class Interface {
     private char fieldLastChar;
     
     private PImage[] buffer;
-    private int xo, yo, swap, textureIndex, textureIndexMax;
+    private int xo, yo, swap;
     private AtomicBoolean textureLoaderWork;
     private TextureLoaderThread textureLoader;
     
     private SoundtrackThread soundtrack;
     
-    private String buttonCreditsContent;
+    private String creditsContent;
     
     
     public Interface() {
@@ -62,6 +62,7 @@ class Interface {
         x = (width - w) / 2;
         this.buttonMenu = new Button(h / 10, h / 10, w, h, "MAIN MENU");
         this.buttonPlay = new Button(x, height / 5 * 2.5 - h * 2, w, h, "PLAY");
+        this.buttonSettings = new Button(x, height / 5 * 3 - h * 2, w, h, "SETTINGS");
         this.buttonCredits = new Button(x, height / 5 * 3.5 - h * 2, w, h, "CREDITS");
         w = width / 8;
         h = height / 8;
@@ -81,17 +82,15 @@ class Interface {
         this.fieldPressed = false;
         this.fieldLastChar = ' ';
         
-        this.xo = this.yo = this.swap = this.textureIndex = 0;
-        this.textureIndexMax = this.db.getTextures().length;
+        this.xo = this.yo = this.swap = 0;
         this.buffer = new PImage[2];
         this.buffer[1] = this.db.getTexture("skybox");
         this.buffer[1].resize(width, height);
-        this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.textureIndex]);
+        this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[0]);
         this.buffer[0].resize(width, height);
-        this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
         this.textureLoaderWork = new AtomicBoolean(false);
         
-        this.buttonCreditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
+        this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
     }
     
     public void draw() {
@@ -103,15 +102,18 @@ class Interface {
                 this.credits();
                 break;
             case 2:
-                this.play();
+                this.settings();
                 break;
             case 3:
-                this.editor();
+                this.play();
                 break;
             case 4:
-                this.chooseWorld();
+                this.editor();
                 break;
             case 5:
+                this.chooseWorld();
+                break;
+            case 6:
                 this.chooseHost();
                 break;
             default:
@@ -124,10 +126,13 @@ class Interface {
         this.drawBackground();
         
         buttonCredits.draw();
+        buttonSettings.draw();
         buttonPlay.draw();
         
         if(this.buttonCredits.isPressed()) {
             this.context = 1;
+        } else if(this.buttonSettings.isPressed()) {
+            this.context = 2;
         } else if(this.buttonPlay.isPressed()) {
             this.drawBackground();
             
@@ -139,7 +144,7 @@ class Interface {
             this.buttons = new Button[buttonsList.size()];
             this.buttons = buttonsList.toArray(this.buttons);
             
-            this.context = 4;
+            this.context = 5;
         }
     }
     
@@ -162,8 +167,19 @@ class Interface {
         stroke(0);
         strokeWeight(1);
         textSize(24);
-        text(this.buttonCreditsContent, (width - textWidth(this.buttonCreditsContent)) / 2, height / 2 - h * 2);
+        text(this.creditsContent, (width - textWidth(this.creditsContent)) / 2, height / 2 - h * 2);
         noFill();
+    }
+    
+    private void settings() {
+        if(keyPressed && key == 96)
+            this.context = 0;
+        
+        this.drawBackground();
+        
+        this.buttonMenu.draw();
+        if(this.buttonMenu.isPressed())
+            this.context = 0;
     }
     
     private void play() {
@@ -232,7 +248,7 @@ class Interface {
                     this.textureLoader.kill();
                     this.textureLoader = null;
                     
-                    this.context = 2;
+                    this.context = 3;
                     
                     break;
                 }
@@ -242,7 +258,7 @@ class Interface {
                 if(button.isActive()) {
                     this.drawBackground();
                     
-                    this.context = 5;
+                    this.context = 6;
                     
                     break;
                 }
@@ -266,7 +282,7 @@ class Interface {
     
     private void chooseHost() {
         if(keyPressed && key == 96)
-            this.context = 4;
+            this.context = 5;
         
         this.drawBackground();
         
@@ -364,6 +380,71 @@ class Interface {
         }
     }
     
+    
+    private class Button {
+        private float x, y, w, h;
+        private String content;
+        private boolean active;
+        
+        
+        public Button(float x, float y, float w, float h, String content) {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+            this.content = content;
+            this.active = false;
+        }
+        
+        
+        public boolean isPressed() {
+            return (mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
+        }
+        
+        public void draw() {
+            if(this.active)
+                fill(255, 127);
+            else
+                fill(0, 127);
+            stroke(255);
+            strokeWeight(this.h / 10);
+            rect(this.x, this.y, this.w, this.h, this.h / 2, this.h / 2, this.h / 2, this.h / 2);
+            if(this.active)
+                fill(0);
+            else
+                fill(255);
+            stroke(0);
+            strokeWeight(1);
+            textSize(16);
+            text(this.content, this.x + (this.w - textWidth(this.content)) / 2, this.y + this.h / 2);
+            noFill();
+        }
+        
+        public void activate() {
+            this.active = true;
+        }
+        
+        public void deactivate() {
+            this.active = false;
+        }
+        
+        public boolean isActive() {
+            return this.active;
+        }
+        
+        public void pop() {
+             if(this.content.length() >= 1)
+                 this.content = this.content.substring(0, this.content.length() - 1);
+        }
+        
+        public void push(char character) {
+            this.content += character;
+        }
+        
+        public String getContent() {
+            return this.content;
+        }
+    }
     
     private class Camera {
         private float cameraPosX, cameraPosY, cameraPosZ, cameraForwardX, cameraForwardY, cameraForwardZ, cameraUpX, cameraUpY, cameraUpZ, cameraRightX, cameraRightY, cameraRightZ;
@@ -499,75 +580,10 @@ class Interface {
         }
     }
     
-    private class Button {
-        private float x, y, w, h;
-        private String content;
-        private boolean active;
-        
-        
-        public Button(float x, float y, float w, float h, String content) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-            this.content = content;
-            this.active = false;
-        }
-        
-        
-        public boolean isPressed() {
-            return (mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
-        }
-        
-        public void draw() {
-            if(this.active)
-                fill(255, 127);
-            else
-                fill(0, 127);
-            stroke(255);
-            strokeWeight(this.h / 10);
-            rect(this.x, this.y, this.w, this.h, this.h / 2, this.h / 2, this.h / 2, this.h / 2);
-            if(this.active)
-                fill(0);
-            else
-                fill(255);
-            stroke(0);
-            strokeWeight(1);
-            textSize(16);
-            text(this.content, this.x + (this.w - textWidth(this.content)) / 2, this.y + this.h / 2);
-            noFill();
-        }
-        
-        public void activate() {
-            this.active = true;
-        }
-        
-        public void deactivate() {
-            this.active = false;
-        }
-        
-        public boolean isActive() {
-            return this.active;
-        }
-        
-        public void pop() {
-             if(this.content.length() >= 1)
-                 this.content = this.content.substring(0, this.content.length() - 1);
-        }
-        
-        public void push(char character) {
-            this.content += character;
-        }
-        
-        public String getContent() {
-            return this.content;
-        }
-    }
     
-    
-    public class SoundtrackThread extends Thread {
+    private class SoundtrackThread extends Thread {
         private Database db;
-        private int soundIndex, soundIndexMax;
+        private int index, indexMax;
         private boolean killed;
         
         public SoundtrackThread(Database db) {
@@ -577,16 +593,16 @@ class Interface {
         
         @Override
         public void run() {
-            this.soundIndex = 0;
-            this.soundIndexMax = this.db.getSounds().length;
+            this.index = 0;
+            this.indexMax = this.db.getSounds().length;
             
             AudioInputStream audioInputStream;
             Clip clip;
             
             while(true)
                 try {
-                    audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[soundIndex]));
-                    this.soundIndex = (this.soundIndex + 1) % this.soundIndexMax;
+                    audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[index]));
+                    this.index = (this.index + 1) % this.indexMax;
                     clip = AudioSystem.getClip();
                     clip.open(audioInputStream);
                     clip.start();
@@ -610,14 +626,14 @@ class Interface {
     public class TextureLoaderThread extends Thread {
         private Database db;
         private PImage[] buffer;
-        private int textureIndex, textureIndexMax;
+        private int index, indexMax;
         private boolean killed;
         private AtomicBoolean work;
         
         public TextureLoaderThread(Database db, PImage[] buffer, AtomicBoolean work) {
             this.db = db;
             this.buffer = buffer;
-            this.textureIndex = 0;
+            this.index = 0;
             this.killed = false;
             this.work = work;
             this.work.set(false);
@@ -625,18 +641,18 @@ class Interface {
         
         @Override
         public void run() {
-            this.textureIndexMax = this.db.getTextures().length;
-            this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
+            this.indexMax = this.db.getTextures().length;
+            this.index = (this.index + 1) % this.indexMax;
             
             while(true)
                 if(this.killed)
                     return;
                 else if(this.work.get()) {
                     this.buffer[1] = this.buffer[0].copy();
-                    this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.textureIndex]);
+                    this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.index]);
                     this.buffer[0].resize(width, height);
                     
-                    this.textureIndex = (this.textureIndex + 1) % this.textureIndexMax;
+                    this.index = (this.index + 1) % this.indexMax;
                     
                     this.work.set(false);
                 }
