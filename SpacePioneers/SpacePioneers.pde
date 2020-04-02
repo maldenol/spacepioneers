@@ -21,8 +21,5 @@ void setup() {
 }
 
 void draw() {
-    if(keyPressed && key == CODED && keyCode == ESC)
-        key = 96;
-    
     iface.draw();
 }
