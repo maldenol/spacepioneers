@@ -301,82 +301,82 @@ class Space {
         }
         
         
-        public void setPos(PVector value) {
-            this.pos = value.copy();
+        public void setPos(PVector pos) {
+            this.pos = pos.copy();
         }
         
-        public void setPos(float x, float y, float z) {
-            this.pos = new PVector(x, y, z);
+        public void setPos(float posX, float posY, float posZ) {
+            this.pos = new PVector(posX, posY, posZ);
         }
         
         public PVector getPos() {
             return this.pos.copy();
         }
         
-        public void setVel(PVector value) {
-            this.vel = value.copy();
+        public void setVel(PVector vel) {
+            this.vel = vel.copy();
         }
         
-        public void setVel(float x, float y, float z) {
-            this.vel = new PVector(x, y, z);
+        public void setVel(float velX, float velY, float velZ) {
+            this.vel = new PVector(velX, velY, velZ);
         }
         
         public PVector getVel() {
             return this.vel.copy();
         }
         
-        public void setMass(float value) {
-            this.mass = value;
+        public void setMass(float mass) {
+            this.mass = mass;
         }
         
         public float getMass() {
             return this.mass;
         }
         
-        public void setRadius(float value) {
-            this.radius = value;
+        public void setRadius(float radius) {
+            this.radius = radius;
         }
         
         public float getRadius() {
             return this.radius;
         }
         
-        public void setAnglePos(float x, float y, float z) {
-            this.anglePosX = x;
-            this.anglePosY = y;
-            this.anglePosZ = z;
+        public void setAnglePos(float anglePosX, float anglePosY, float anglePosZ) {
+            this.anglePosX = anglePosX;
+            this.anglePosY = anglePosY;
+            this.anglePosZ = anglePosZ;
         }
         
-        public void setAnglePos(float x, float z) {
-            this.setAnglePos(x, 0, z);
+        public void setAnglePos(float anglePosX, float anglePosZ) {
+            this.setAnglePos(anglePosX, 0, anglePosZ);
         }
         
         public float[] getAnglePos() {
             return new float[]{this.anglePosX, this.anglePosY, this.anglePosZ};
         }
         
-        public void setAnglePeriod(float value) {
-            this.angleVelY = TWO_PI / value;
+        public void setAnglePeriod(float anglePeriod) {
+            this.angleVelY = TWO_PI / anglePeriod;
         }
         
         public float getAnglePeriod() {
             return TWO_PI / this.angleVelY;
         }
         
-        public void setTexture(PImage value) {
-            this.texture = value.copy();
+        public void setTexture(PImage texture) {
+            this.texture = texture.copy();
         }
         
         public PImage getTexture() {
             return this.texture.copy();
         }
         
-        public void accelerate(PVector value) {
-            this.vel.add(value);
+        public void accelerate(PVector vel) {
+            this.vel.add(vel);
         }
         
-        public void accelerateAng(float value) {
-            this.angleVelY += value;
+        public void accelerateAng(float angleVel) {
+            this.angleVelY += angleVel;
         }
         
         public void tick() {

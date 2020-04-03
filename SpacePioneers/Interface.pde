@@ -4,8 +4,8 @@
       Camera class
       Button class
       ButtonServer class
-      SoundtrackThread class that extends Thread
       TextureLoaderThread class that extends Thread
+      SoundtrackThread class that extends Thread
   Malovanyi Denys Olehovych
 ***/
 
@@ -20,21 +20,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 
 class Interface {
-    private int context;
-    
-    private Camera camera;
-    
     private Database db;
     
-    private Space space;
-    private PShape skybox;
+    private int context;
     
-    private Button buttonMenu;
+    private Button buttonBack;
     private Button buttonCredits, buttonSettings, buttonPlay;
+    private Button buttonContinue, buttonQuit;
     private Button buttonSingleplayer, buttonMultiplayer, buttonEditor;
     private Button buttonHost, buttonConnect;
     private Button fieldIP, fieldPort;
-    private Button[] buttons;
+    private Button[] worlds;
     
     private ButtonServer buttonServer;
     
@@ -47,23 +43,34 @@ class Interface {
     
     private String creditsContent;
     
+    private Space space;
+    private Camera camera;
+    
+    private PShape skybox;
+    private boolean pause;
+    
+    private int timeLastPress, timeBetweenPresses;
+    
     
     public Interface() {
-        float w, h, x, y0;
+        this.db = new Database();
         
         this.context = 0;
         
-        this.camera = new Camera();
-        
-        this.db = new Database();
-        
+        float w, h, x, y0;
+        w = width;
+        h = height / 16;
+        x = h / 10;
+        y0 = h / 10;
+        this.buttonBack = new Button(x, y0, w - 2 * x, h, "BACK");
         w = width / 8;
         h = height / 16;
         x = (width - w) / 2;
-        this.buttonMenu = new Button(h / 10, h / 10, w, h, "MAIN MENU");
         this.buttonPlay = new Button(x, height / 5 * 2.5 - h * 2, w, h, "PLAY");
         this.buttonSettings = new Button(x, height / 5 * 3 - h * 2, w, h, "SETTINGS");
         this.buttonCredits = new Button(x, height / 5 * 3.5 - h * 2, w, h, "CREDITS");
+        this.buttonContinue = new Button(x, height / 5 * 2.5 - h * 2, w, h, "CONTINUE");
+        this.buttonQuit = new Button(x, height / 5 * 3.5 - h * 2, w, h, "QUIT");
         w = width / 8;
         h = height / 8;
         x = width - w;
@@ -80,13 +87,13 @@ class Interface {
         this.buttonConnect = new Button(x, y0 + h * 3, w, h, "CONNECT");
         
         this.buttonServer = new ButtonServer();
-        this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonMenu}, new Button[]{}, new Button[]{}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonMenu}, new Button[]{}, new Button[]{}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonMenu, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttons});
-        this.buttonServer.addContext(new Button[]{this.buttonMenu, this.buttonHost, this.buttonConnect}, new Button[]{}, new Button[]{this.fieldIP, this.fieldPort}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonContinue, this.buttonQuit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonHost, this.buttonConnect}, new Button[]{}, new Button[]{this.fieldIP, this.fieldPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
         
         this.xo = this.yo = this.swap = 0;
         this.buffer = new PImage[2];
@@ -97,6 +104,12 @@ class Interface {
         this.textureLoaderWork = new AtomicBoolean(false);
         
         this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
+        
+        this.camera = new Camera();
+        this.pause = false;
+        
+        this.timeLastPress = 0;
+        this.timeBetweenPresses = 300;
     }
     
     public void draw() {
@@ -129,6 +142,12 @@ class Interface {
     }
     
     private void menu() {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+            this.buttonServer.clear(this.context);
+            this.context = 1;
+            this.timeLastPress = millis();
+        }
+        
         this.drawBackground();
         
         this.buttonServer.serve(this.context);
@@ -149,26 +168,27 @@ class Interface {
             float x = (width - w) / 2, y0 = height / 8;
             for(String name : this.db.getXMLs())
                 buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
-            this.buttons = new Button[buttonsList.size()];
-            this.buttons = buttonsList.toArray(this.buttons);
+            this.worlds = new Button[buttonsList.size()];
+            this.worlds = buttonsList.toArray(this.worlds);
             
             this.context = 5;
             
-            this.buttonServer.setContext(this.context, new Button[]{this.buttonMenu, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttons});
+            this.buttonServer.setContext(this.context, new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}});
         }
     }
     
     private void credits() {
-        if(keyPressed && key == 96) {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
             this.buttonServer.clear(this.context);
             this.context = 0;
+            this.timeLastPress = millis();
         }
         
         this.drawBackground();
         
         this.buttonServer.serve(this.context);
         
-        if(this.buttonMenu.isActive()) {
+        if(this.buttonBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
@@ -187,40 +207,51 @@ class Interface {
     }
     
     private void settings() {
-        if(keyPressed && key == 96) {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
             this.buttonServer.clear(this.context);
             this.context = 0;
+            this.timeLastPress = millis();
         }
         
         this.drawBackground();
         
         this.buttonServer.serve(this.context);
         
-        if(this.buttonMenu.isActive()) {
+        if(this.buttonBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
     }
     
     private void play() {
-        if(keyPressed && key == 96) {
-            this.buttonServer.clear(this.context);
-            this.context = 0;
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+            this.pause = !this.pause;
+            try {
+                Robot mouse = new Robot();
+                mouse.mouseMove((int)(width / 2), (int)(height / 2));
+            } catch(AWTException e) {}
+            this.timeLastPress = millis();
         }
         
-        this.space.tick();
+        if(!this.pause) {
+            this.space.tick();
+            this.camera.controls();
+        }
         
-        this.camera.controls();
         background(0);
         this.camera.begin(this.skybox);
         this.space.draw();
         this.camera.end();
+        
+        if(this.pause)
+            this.playMenu();
     }
     
     private void editor() {
-        if(keyPressed && key == 96) {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
             this.buttonServer.clear(this.context);
             this.context = 0;
+            this.timeLastPress = millis();
         }
         
         this.camera.controls();
@@ -231,39 +262,42 @@ class Interface {
     }
     
     private void chooseWorld() {
-        if(keyPressed && key == 96) {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
             this.buttonServer.clear(this.context);
             this.context = 0;
+            this.timeLastPress = millis();
         }
         
         this.drawBackground();
         
         this.buttonServer.serve(this.context);
         
-        if(this.buttonMenu.isActive()) {
+        if(this.buttonBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
         
         if(this.buttonSingleplayer.isActive()) {
-            for(Button button : this.buttons) {
+            for(Button button : this.worlds) {
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
                     
                     this.drawBackground();
                     
+                    this.space = new Space(button.getContent(), this.db);
+                    this.camera = new Camera();
                     noStroke();
                     fill(255);
-                    this.space = new Space(button.getContent(), this.db);
                     this.skybox = createShape(SPHERE, 6E3);
                     this.skybox.setTexture(this.space.getSkybox());
                     this.skybox.rotateY(HALF_PI);
-                    
-                    this.soundtrack.kill();
-                    this.soundtrack = null;
+                    this.pause = false;
                     
                     this.textureLoader.kill();
                     this.textureLoader = null;
+                    
+                    this.soundtrack.kill();
+                    this.soundtrack = null;
                     
                     this.context = 3;
                     
@@ -271,7 +305,7 @@ class Interface {
                 }
             }
         } else if(this.buttonMultiplayer.isActive()) {
-            for(Button button : this.buttons) {
+            for(Button button : this.worlds) {
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
                     
@@ -283,17 +317,20 @@ class Interface {
                 }
             }
         } else if(this.buttonEditor.isActive()) {
-            for(Button button : this.buttons) {
+            for(Button button : this.worlds) {
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
                     
                     this.drawBackground();
                     
-                    this.soundtrack.kill();
-                    this.soundtrack = null;
+                    this.camera = new Camera();
+                    this.pause = false;
                     
                     this.textureLoader.kill();
                     this.textureLoader = null;
+                    
+                    this.soundtrack.kill();
+                    this.soundtrack = null;
                     
                     break;
                 }
@@ -302,18 +339,19 @@ class Interface {
     }
     
     private void chooseHost() {
-        if(keyPressed && key == 96) {
+        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
             this.buttonServer.clear(this.context);
             this.context = 5;
+            this.timeLastPress = millis();
         }
         
         this.drawBackground();
         
         this.buttonServer.serve(this.context);
         
-        if(this.buttonMenu.isActive()) {
+        if(this.buttonBack.isActive()) {
             this.buttonServer.clear(this.context);
-            this.context = 0;
+            this.context = 5;
         } else if(this.buttonHost.isActive()) {
             this.buttonServer.clear(this.context);
         } else if(this.buttonConnect.isActive()) {
@@ -357,13 +395,42 @@ class Interface {
         circle(mouseX, mouseY, 8);
         noFill();
         
+        if(this.textureLoader == null) {
+            this.textureLoader = new TextureLoaderThread(this.db, this.buffer, this.textureLoaderWork);
+            this.textureLoader.start();
+        }
         if(this.soundtrack == null) {
             this.soundtrack = new SoundtrackThread(this.db);
             this.soundtrack.start();
         }
-        if(this.textureLoader == null) {
-            this.textureLoader = new TextureLoaderThread(this.db, this.buffer, this.textureLoaderWork);
-            this.textureLoader.start();
+    }
+    
+    private void playMenu() {
+        camera();
+        
+        float w = width / 4, h = height / 4;
+        fill(0, 127);
+        stroke(255);
+        strokeWeight(h / 10);
+        rect(w, h, width - w * 2, height - h * 2, h / 2, h / 2, h / 2, h / 2);
+        
+        this.buttonServer.serve(this.context);
+        
+        stroke(255);
+        strokeWeight(2);
+        fill(0, 127);
+        circle(mouseX, mouseY, 8);
+        noFill();
+        
+        if(this.buttonContinue.isActive()) {
+            this.buttonServer.clear(this.context);
+            this.pause = false;
+        } else if(this.buttonSettings.isActive()) {
+            this.buttonServer.clear(this.context);
+            this.context = 2;
+        } else if(this.buttonQuit.isActive()) {
+            this.buttonServer.clear(this.context);
+            this.context = 0;
         }
     }
     
@@ -441,64 +508,79 @@ class Interface {
         private ArrayList<Button[]> buttons;
         private ArrayList<Button[]> flags;
         private ArrayList<Button[]> fields;
-        private ArrayList<Button[][]> lists;
+        private ArrayList<Button[][]> buttonsLists;
+        private ArrayList<Button[][]> flagsLists;
+        private ArrayList<Button[][]> fieldsLists;
         
         private boolean fieldPressed;
         private char fieldLastChar;
+        private int timeLastPress, timeBetweenPresses;
         
         
         public ButtonServer() {
             this.buttons = new ArrayList<Button[]>();
             this.flags = new ArrayList<Button[]>();
             this.fields = new ArrayList<Button[]>();
-            this.lists = new ArrayList<Button[][]>();
+            this.buttonsLists = new ArrayList<Button[][]>();
+            this.flagsLists = new ArrayList<Button[][]>();
+            this.fieldsLists = new ArrayList<Button[][]>();
             
             this.fieldPressed = false;
             this.fieldLastChar = ' ';
+            this.timeLastPress = 0;
+            this.timeBetweenPresses = 300;
         }
         
         
-        public void addContext(Button[] buttons, Button[] flags, Button[] fields, Button[][] lists) {
+        public void addContext(Button[] buttons, Button[] flags, Button[] fields, Button[][] buttonsLists, Button[][] flagsLists, Button[][] fieldsLists) {
             this.buttons.add(buttons.clone());
             this.flags.add(flags.clone());
             this.fields.add(fields.clone());
-            this.lists.add(lists.clone());
+            this.buttonsLists.add(buttonsLists.clone());
+            this.flagsLists.add(flagsLists.clone());
+            this.fieldsLists.add(fieldsLists.clone());
         }
         
-        public void setContext(int context, Button[] buttons, Button[] flags, Button[] fields, Button[][] lists) {
+        public void setContext(int context, Button[] buttons, Button[] flags, Button[] fields, Button[][] buttonsLists, Button[][] flagsLists, Button[][] fieldsLists) {
             this.buttons.set(context, buttons.clone());
             this.flags.set(context, flags.clone());
             this.fields.set(context, fields.clone());
-            this.lists.set(context, lists.clone());
+            this.buttonsLists.set(context, buttonsLists.clone());
+            this.flagsLists.set(context, flagsLists.clone());
+            this.fieldsLists.set(context, fieldsLists.clone());
         }
         
         public void serve(int context) {
-            for(Button button : buttons.get(context)) {
+            for(Button button : this.buttons.get(context)) {
                 button.draw();
                 
-                if(button.isPressed()) {
+                if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     button.activate();
-                    for(Button b : buttons.get(context))
+                    for(Button b : this.buttons.get(context))
                         if(b != button)
                             b.deactivate();
+                    this.timeLastPress = millis();
                 }
             }
             
-            for(Button flag : flags.get(context)) {
+            for(Button flag : this.flags.get(context)) {
                 flag.draw();
                 
-                if(flag.isPressed())
+                if(flag.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     flag.toggle();
+                    this.timeLastPress = millis();
+                }
             }
             
-            for(Button field : fields.get(context)) {
+            for(Button field : this.fields.get(context)) {
                 field.draw();
                 
-                if(field.isPressed()) {
+                if(field.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     field.activate();
-                    for(Button f : fields.get(context))
+                    for(Button f : this.fields.get(context))
                         if(f != field)
                             f.deactivate();
+                    this.timeLastPress = millis();
                 }
                 
                 if(field.isActive())
@@ -515,32 +597,80 @@ class Interface {
                         this.fieldPressed = false;
             }
             
-            for(Button[] list : lists.get(context)) {
-                for(Button element : list) {
+            for(Button[] buttonList : this.buttonsLists.get(context)) {
+                for(Button element : buttonList) {
                     element.draw();
                     
-                    if(element.isPressed()) {
+                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                         element.activate();
-                        for(Button e : list)
-                          if(e != element)
-                              e.deactivate();
+                        for(Button e : buttonList)
+                            if(e != element)
+                                e.deactivate();
+                        this.timeLastPress = millis();
                     }
+                }
+            }
+            
+            for(Button[] flagList : this.flagsLists.get(context)) {
+                for(Button element : flagList) {
+                    element.draw();
+                    
+                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        element.toggle();
+                        this.timeLastPress = millis();
+                    }
+                }
+            }
+            
+            for(Button[] fieldList : this.fieldsLists.get(context)) {
+                for(Button element : fieldList) {
+                    element.draw();
+                    
+                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        element.activate();
+                        for(Button[] fL : this.fieldsLists.get(context))
+                            for(Button e : fL)
+                                if(e != element)
+                                    e.deactivate();
+                        this.timeLastPress = millis();
+                    }
+                    
+                    if(element.isActive())
+                        if(keyPressed) {
+                            if(!this.fieldPressed || this.fieldLastChar != key) {
+                                if(keyCode == BACKSPACE)
+                                    element.pop();
+                                else if(key != CODED)
+                                    element.push(key);
+                                this.fieldLastChar = key;
+                            }
+                            this.fieldPressed = true;
+                        } else
+                            this.fieldPressed = false;
                 }
             }
         }
         
         public void clear(int context) {
-            for(Button button : buttons.get(context))
+            for(Button button : this.buttons.get(context))
                 button.deactivate();
             
-            for(Button flag : flags.get(context))
+            for(Button flag : this.flags.get(context))
                 flag.deactivate();
             
-            for(Button field : fields.get(context))
+            for(Button field : this.fields.get(context))
                 field.deactivate();
             
-            for(Button[] list : lists.get(context))
-                for(Button element : list)
+            for(Button[] buttonsList : this.buttonsLists.get(context))
+                for(Button element : buttonsList)
+                    element.deactivate();
+            
+            for(Button[] flagsList : this.flagsLists.get(context))
+                for(Button element : flagsList)
+                    element.deactivate();
+            
+            for(Button[] fieldsList : this.fieldsLists.get(context))
+                for(Button element : fieldsList)
                     element.deactivate();
         }
     }
@@ -678,6 +808,46 @@ class Interface {
     }
     
     
+    public class TextureLoaderThread extends Thread {
+        private Database db;
+        private PImage[] buffer;
+        private int index, indexMax;
+        private boolean killed;
+        private AtomicBoolean work;
+        
+        public TextureLoaderThread(Database db, PImage[] buffer, AtomicBoolean work) {
+            this.db = db;
+            this.buffer = buffer;
+            this.index = 0;
+            this.killed = false;
+            this.work = work;
+            this.work.set(false);
+        }
+        
+        @Override
+        public void run() {
+            this.indexMax = this.db.getTextures().length;
+            this.index = (this.index + 1) % this.indexMax;
+            
+            while(true)
+                if(this.killed)
+                    return;
+                else if(this.work.get()) {
+                    this.buffer[1] = this.buffer[0].copy();
+                    this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.index]);
+                    this.buffer[0].resize(width, height);
+                    
+                    this.index = (this.index + 1) % this.indexMax;
+                    
+                    this.work.set(false);
+                }
+        }
+        
+        public void kill() {
+            this.killed = true;
+        }
+    }
+    
     private class SoundtrackThread extends Thread {
         private Database db;
         private int index, indexMax;
@@ -713,46 +883,6 @@ class Interface {
                     }
                     clip.close();
                 } catch(Exception e) {}
-        }
-        
-        public void kill() {
-            this.killed = true;
-        }
-    }
-    
-    public class TextureLoaderThread extends Thread {
-        private Database db;
-        private PImage[] buffer;
-        private int index, indexMax;
-        private boolean killed;
-        private AtomicBoolean work;
-        
-        public TextureLoaderThread(Database db, PImage[] buffer, AtomicBoolean work) {
-            this.db = db;
-            this.buffer = buffer;
-            this.index = 0;
-            this.killed = false;
-            this.work = work;
-            this.work.set(false);
-        }
-        
-        @Override
-        public void run() {
-            this.indexMax = this.db.getTextures().length;
-            this.index = (this.index + 1) % this.indexMax;
-            
-            while(true)
-                if(this.killed)
-                    return;
-                else if(this.work.get()) {
-                    this.buffer[1] = this.buffer[0].copy();
-                    this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.index]);
-                    this.buffer[0].resize(width, height);
-                    
-                    this.index = (this.index + 1) % this.indexMax;
-                    
-                    this.work.set(false);
-                }
         }
         
         public void kill() {
