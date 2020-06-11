@@ -759,45 +759,37 @@ class Interface {
                     this.cameraPosX += this.cameraForwardX * this.cameraSpeed;
                     this.cameraPosY += this.cameraForwardY * this.cameraSpeed;
                     this.cameraPosZ += this.cameraForwardZ * this.cameraSpeed;
-                }
-                if(key == 's') { // move backward
+                } else if(key == 's') { // move backward
                     this.cameraPosX -= this.cameraForwardX * this.cameraSpeed;
                     this.cameraPosY -= this.cameraForwardY * this.cameraSpeed;
                     this.cameraPosZ -= this.cameraForwardZ * this.cameraSpeed;
-                }
-                if(key == 'd') { // move right
+                } else if(key == 'd') { // move right
                     this.cameraPosX += this.cameraRightX * this.cameraSpeed;
                     this.cameraPosY += this.cameraRightY * this.cameraSpeed;
                     this.cameraPosZ += this.cameraRightZ * this.cameraSpeed;
-                }
-                if(key == 'a') { // move left
+                } else if(key == 'a') { // move left
                     this.cameraPosX -= this.cameraRightX * this.cameraSpeed;
                     this.cameraPosY -= this.cameraRightY * this.cameraSpeed;
                     this.cameraPosZ -= this.cameraRightZ * this.cameraSpeed;
-                }
-                if(key == ' ') { // move up
+                } else if(key == ' ') { // move up
                     this.cameraPosX -= this.cameraUpX * this.cameraSpeed;
                     this.cameraPosY -= this.cameraUpY * this.cameraSpeed;
                     this.cameraPosZ -= this.cameraUpZ * this.cameraSpeed;
-                }
-                if(keyCode == SHIFT) { // move down
+                } else if(keyCode == SHIFT) { // move down
                     this.cameraPosX += this.cameraUpX * this.cameraSpeed;
                     this.cameraPosY += this.cameraUpY * this.cameraSpeed;
                     this.cameraPosZ += this.cameraUpZ * this.cameraSpeed;
-                }
-                if(key == 'q') { // spin left
+                } else if(key == 'q') { // spin left
                     this.cameraAngleZ -= TWO_PI / FPS;
                     this.cameraUpX = sin(this.cameraAngleZ);
                     this.cameraUpY = cos(this.cameraAngleZ);
                     this.cameraUpZ = sin(this.cameraAngleZ);
-                }
-                if(key == 'e') { // spin right
+                } else if(key == 'e') { // spin right
                     this.cameraAngleZ += TWO_PI / FPS;
                     this.cameraUpX = sin(this.cameraAngleZ);
                     this.cameraUpY = cos(this.cameraAngleZ);
                     this.cameraUpZ = sin(this.cameraAngleZ);
-                }
-                if(key == 'r') { // spin back
+                } else if(key == 'r') { // spin back
                     this.cameraAngleZ = 0;
                     this.cameraUpX = sin(this.cameraAngleZ);
                     this.cameraUpY = cos(this.cameraAngleZ);
