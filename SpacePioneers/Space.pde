@@ -67,6 +67,9 @@ class Space {
         String name;
         PImage texture;
         
+        XML parent;
+        float[][] result;
+
         for (int i = 0; i < parents.length; i++) {
             posX = parents[i].getFloat("posX") * this.valuesKoefficient;
             posY = parents[i].getFloat("posY") * this.valuesKoefficient;
@@ -81,7 +84,7 @@ class Space {
             mass = parents[i].getFloat("mass") * this.valuesKoefficient*this.valuesKoefficient;
             radius = parents[i].getFloat("radius") * this.valuesKoefficient;
             
-            XML parent = parents[i].getParent();
+            parent = parents[i].getParent();
             orbitMass = parent.getFloat("mass");
             orbitPosX = parent.getFloat("posX");
             orbitPosY = parent.getFloat("posY");
@@ -110,7 +113,7 @@ class Space {
             body.setTexture(texture);
             
             if(orbitMass != 0.0) {
-                float[][] result = convertKeplerianToCartesian(semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
+                result = convertKeplerianToCartesian(semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
                 posX = result[0][0];
                 posY = result[0][1];
                 posZ = result[0][2];
@@ -187,6 +190,8 @@ class Space {
     public void tick() {
         Iterator<Body> iter = bodies.iterator();
         
+        PVector force;
+
         while (iter.hasNext()) {
             Body obj1 = iter.next();
             
@@ -200,7 +205,7 @@ class Space {
                     if (this.isCollide(obj1, obj2))
                         this.collide(obj1, obj2);
                     
-                    PVector force = this.gForce(obj1, obj2);
+                    force = this.gForce(obj1, obj2);
                     obj1.accelerate(force.div(obj1.getMass()));
                     obj2.accelerate(force.div(obj2.getMass()));
                 }
@@ -271,15 +276,19 @@ class Space {
     }
     
     public void draw() {
+        PVector pos;
+        float[] angle;
+        PShape pshape;
+
         noStroke();
         fill(255);
         for (Body item : this.bodies) {
-            PVector pos = item.getPos();
-            float[] angle = item.getAnglePos();
+            pos = item.getPos();
+            angle = item.getAnglePos();
             
             translate(pos.x, pos.y, pos.z);
             
-            PShape pshape = createShape(SPHERE, item.getRadius());
+            pshape = createShape(SPHERE, item.getRadius());
             pshape.setTexture(item.getTexture());
             pshape.rotateY(angle[1]);
             pshape.rotateX(angle[0]);

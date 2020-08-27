@@ -24,6 +24,7 @@
 
 
 final int FPS = 60;
+final float HALF_WIDTH = width / 2, HALF_HEIGHT = height / 2;
 
 Interface iface;
 

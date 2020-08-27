@@ -247,7 +247,7 @@ class Interface {
             this.pause = !this.pause;
             try {
                 Robot mouse = new Robot();
-                mouse.mouseMove((int)(width / 2), (int)(height / 2));
+                mouse.mouseMove((int)(HALF_WIDTH), (int)(HALF_HEIGHT));
             } catch(AWTException e) {}
             this.timeLastPress = millis();
         }
@@ -695,28 +695,26 @@ class Interface {
     }
     
     private class Camera {
-        private float cameraPosX, cameraPosY, cameraPosZ, cameraForwardX, cameraForwardY, cameraForwardZ, cameraUpX, cameraUpY, cameraUpZ, cameraRightX, cameraRightY, cameraRightZ;
-        private float cameraAngleX, cameraAngleY, cameraAngleZ;
-        private float cameraSensivity, cameraSpeed;
-        private float cameraZoom;
-        private int cameraMode;
+        private float posX, posY, posZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
+        private float speed, angleSpeed;
+        private float zoom;
+        private int mode;
         
         private Robot mouse;
         
         
         public Camera() {
-            this.cameraPosX = this.cameraPosY = this.cameraPosZ = 0;
-            this.cameraForwardX = this.cameraForwardY = 0;
-            this.cameraForwardZ = 1;
-            this.cameraUpX = this.cameraUpZ = 0;
-            this.cameraUpY = 1;
-            this.cameraRightX = 1;
-            this.cameraRightY = this.cameraRightZ = 0;
-            this.cameraAngleX = this.cameraAngleY = cameraAngleZ = 0;
-            this.cameraSensivity = 4E-2;
-            this.cameraSpeed = 1E2;
-            this.cameraZoom = 1;
-            this.cameraMode = 0;
+            this.posX = this.posY = this.posZ = 0;
+            this.forwardX = this.forwardY = 0;
+            this.forwardZ = 1;
+            this.upX = this.upZ = 0;
+            this.upY = 1;
+            this.rightX = 1;
+            this.rightY = this.rightZ = 0;
+            this.angleSpeed = TWO_PI / FPS * 3E-1;
+            this.speed = 1E2;
+            this.zoom = 1;
+            this.mode = 0;
             
             try {
                 this.mouse = new Robot();
@@ -726,15 +724,15 @@ class Interface {
         
         public void begin() {
             beginCamera();
-            camera(this.cameraPosX, this.cameraPosY, this.cameraPosZ, this.cameraForwardX + this.cameraPosX, this.cameraForwardY + this.cameraPosY, this.cameraForwardZ + this.cameraPosZ, this.cameraUpX, this.cameraUpY, this.cameraUpZ);
+            camera(this.posX, this.posY, this.posZ, this.forwardX + this.posX, this.forwardY + this.posY, this.forwardZ + this.posZ, this.upX, this.upY, this.upZ);
         }
         
         public void begin(PShape skybox) {
             this.begin();
             
-            translate(this.cameraPosX, this.cameraPosY, this.cameraPosZ);
+            translate(this.posX, this.posY, this.posZ);
             shape(skybox, 0, 0);
-            translate(-this.cameraPosX, -this.cameraPosY, -this.cameraPosZ);
+            translate(-this.posX, -this.posY, -this.posZ);
         }
         
         public void end() {
@@ -742,79 +740,111 @@ class Interface {
         }
         
         public void controls() {
-            float w = width / 2, h = height / 2;
+            float[] quaternion;
+            PVector vector;
             
             if(mouseX != pmouseX || mouseY != pmouseY) {
-                this.cameraAngleY -= (radians(mouseX - w) * cos(this.cameraAngleZ) - radians(mouseY - h) * sin(this.cameraAngleZ)) * this.cameraSensivity;
-                this.cameraAngleX += (radians(mouseY - h) * cos(this.cameraAngleZ) + radians(mouseX - w) * sin(this.cameraAngleZ)) * this.cameraSensivity;
-                if(this.cameraAngleX <= -HALF_PI * 0.9)
-                    this.cameraAngleX = -HALF_PI * 0.9;
-                else if(this.cameraAngleX >= HALF_PI * 0.9)
-                    this.cameraAngleX = HALF_PI * 0.9;
+                // rotate left or right
+                quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed));
+                this.forwardX = quaternion[0];
+                this.forwardY = quaternion[1];
+                this.forwardZ = quaternion[2];
                 
-                this.mouse.mouseMove((int)w, (int)h);
+                vector = new PVector(this.forwardY * this.upZ - this.forwardZ * this.upY, this.forwardX * this.upZ - this.upZ * this.forwardX, this.forwardX * this.upY - this.forwardY * this.upX);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
                 
-                this.cameraForwardX = cos(this.cameraAngleX) * sin(this.cameraAngleY);
-                this.cameraForwardY = sin(this.cameraAngleX);
-                this.cameraForwardZ = cos(this.cameraAngleX) * cos(this.cameraAngleY);
+                // rotate up or down
+                quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, -this.angleSpeed, this.angleSpeed));
+                this.forwardX = quaternion[0];
+                this.forwardY = quaternion[1];
+                this.forwardZ = quaternion[2];
                 
-                PVector right = new PVector(this.cameraForwardY * this.cameraUpZ - this.cameraForwardZ * this.cameraUpY, this.cameraForwardX * this.cameraUpZ - this.cameraUpZ * this.cameraForwardX, this.cameraForwardX * this.cameraUpY - this.cameraForwardY * this.cameraUpX);
-                right.normalize();
-                this.cameraRightX = right.x;
-                this.cameraRightY = right.y;
-                this.cameraRightZ = right.z;
+                vector = new PVector(this.forwardY * this.rightZ - this.forwardZ * this.rightY, this.forwardX * this.rightZ - this.rightZ * this.forwardX, this.forwardX * this.rightY - this.forwardY * this.rightX);
+                vector.normalize();
+                this.upX = -vector.x;
+                this.upY = -vector.y;
+                this.upZ = -vector.z;
                 
-                /*
-                PVector up = new PVector(this.cameraForwardY * this.cameraRightZ - this.cameraForwardZ * this.cameraRightY, this.cameraForwardX * this.cameraRightZ - this.cameraRightZ * this.cameraForwardX, this.cameraForwardX * this.cameraRightY - this.cameraForwardY * this.cameraRightX);
-                up.normalize();
-                this.cameraUpX = -up.x;
-                this.cameraUpY = -up.y;
-                this.cameraUpZ = -up.z;
-                */
+                // return mouse back
+                this.mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
             }
             
             if(keyPressed) {
                 if(key == 'w') { // move forward
-                    this.cameraPosX += this.cameraForwardX * this.cameraSpeed;
-                    this.cameraPosY += this.cameraForwardY * this.cameraSpeed;
-                    this.cameraPosZ += this.cameraForwardZ * this.cameraSpeed;
-                } else if(key == 's') { // move backward
-                    this.cameraPosX -= this.cameraForwardX * this.cameraSpeed;
-                    this.cameraPosY -= this.cameraForwardY * this.cameraSpeed;
-                    this.cameraPosZ -= this.cameraForwardZ * this.cameraSpeed;
-                } else if(key == 'd') { // move right
-                    this.cameraPosX += this.cameraRightX * this.cameraSpeed;
-                    this.cameraPosY += this.cameraRightY * this.cameraSpeed;
-                    this.cameraPosZ += this.cameraRightZ * this.cameraSpeed;
-                } else if(key == 'a') { // move left
-                    this.cameraPosX -= this.cameraRightX * this.cameraSpeed;
-                    this.cameraPosY -= this.cameraRightY * this.cameraSpeed;
-                    this.cameraPosZ -= this.cameraRightZ * this.cameraSpeed;
-                } else if(key == ' ') { // move up
-                    this.cameraPosX -= this.cameraUpX * this.cameraSpeed;
-                    this.cameraPosY -= this.cameraUpY * this.cameraSpeed;
-                    this.cameraPosZ -= this.cameraUpZ * this.cameraSpeed;
-                } else if(keyCode == SHIFT) { // move down
-                    this.cameraPosX += this.cameraUpX * this.cameraSpeed;
-                    this.cameraPosY += this.cameraUpY * this.cameraSpeed;
-                    this.cameraPosZ += this.cameraUpZ * this.cameraSpeed;
-                } else if(key == 'q') { // spin left
-                    this.cameraAngleZ -= TWO_PI / FPS;
-                    this.cameraUpX = sin(this.cameraAngleZ);
-                    this.cameraUpY = cos(this.cameraAngleZ);
-                    this.cameraUpZ = sin(this.cameraAngleZ);
-                } else if(key == 'e') { // spin right
-                    this.cameraAngleZ += TWO_PI / FPS;
-                    this.cameraUpX = sin(this.cameraAngleZ);
-                    this.cameraUpY = cos(this.cameraAngleZ);
-                    this.cameraUpZ = sin(this.cameraAngleZ);
-                } else if(key == 'r') { // spin back
-                    this.cameraAngleZ = 0;
-                    this.cameraUpX = sin(this.cameraAngleZ);
-                    this.cameraUpY = cos(this.cameraAngleZ);
-                    this.cameraUpZ = sin(this.cameraAngleZ);
+                    this.posX += this.forwardX * this.speed;
+                    this.posY += this.forwardY * this.speed;
+                    this.posZ += this.forwardZ * this.speed;
+                }
+                if(key == 's') { // move backward
+                    this.posX -= this.forwardX * this.speed;
+                    this.posY -= this.forwardY * this.speed;
+                    this.posZ -= this.forwardZ * this.speed;
+                }
+                if(key == 'd') { // move right
+                    this.posX += this.rightX * this.speed;
+                    this.posY += this.rightY * this.speed;
+                    this.posZ += this.rightZ * this.speed;
+                }
+                if(key == 'a') { // move left
+                    this.posX -= this.rightX * this.speed;
+                    this.posY -= this.rightY * this.speed;
+                    this.posZ -= this.rightZ * this.speed;
+                }
+                if(key == ' ') { // move up
+                    this.posX -= this.upX * this.speed;
+                    this.posY -= this.upY * this.speed;
+                    this.posZ -= this.upZ * this.speed;
+                }
+                if(keyCode == SHIFT) { // move down
+                    this.posX += this.upX * this.speed;
+                    this.posY += this.upY * this.speed;
+                    this.posZ += this.upZ * this.speed;
+                }
+                if(key == 'q') { // spin left
+                    quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
+                    this.upX = quaternion[0];
+                    this.upY = quaternion[1];
+                    this.upZ = quaternion[2];
+
+                    vector = new PVector(this.forwardY * this.upZ - this.forwardZ * this.upY, this.forwardX * this.upZ - this.upZ * this.forwardX, this.forwardX * this.upY - this.forwardY * this.upX);
+                    vector.normalize();
+                    this.rightX = vector.x;
+                    this.rightY = vector.y;
+                    this.rightZ = vector.z;
+                }
+                if(key == 'e') { // spin right
+                    quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
+                    this.upX = quaternion[0];
+                    this.upY = quaternion[1];
+                    this.upZ = quaternion[2];
+
+                    vector = new PVector(this.forwardY * this.upZ - this.forwardZ * this.upY, this.forwardX * this.upZ - this.upZ * this.forwardX, this.forwardX * this.upY - this.forwardY * this.upX);
+                    vector.normalize();
+                    this.rightX = vector.x;
+                    this.rightY = vector.y;
+                    this.rightZ = vector.z;
                 }
             }
+        }
+
+        public float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
+            float[] p = new float[]{0, px, py, pz};
+            float[] a = new float[]{cos(angle), sin(angle) * ax, sin(angle) * ay, sin(angle) * az};
+
+            p[0] = 0 - (a[1]) * (p[1]) - (a[2]) * (p[2]) - (a[3]) * (p[3]);
+            p[1] = (a[0]) * (p[1]) + 0 + (a[2]) * (p[3]) - (a[3]) * (p[2]);
+            p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0 + (a[3]) * (p[1]);
+            p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0;
+
+            p[0] = (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
+            p[1] = - (p[0]) * (a[1]) + (p[1]) * (a[0]) - (p[2]) * (a[3]) + (p[3]) * (a[2]);
+            p[2] = - (p[0]) * (a[2]) + (p[1]) * (a[3]) + (p[2]) * (a[0]) - (p[3]) * (a[1]);
+            p[3] = - (p[0]) * (a[3]) - (p[1]) * (a[2]) + (p[2]) * (a[1]) + (p[3]) * (a[0]);
+
+            return new float[]{p[1], p[2], p[3]};
         }
     }
     
@@ -877,6 +907,8 @@ class Interface {
             AudioInputStream audioInputStream;
             Clip clip;
             
+            int wait, delayDuration;
+
             while(true)
                 try {
                     audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[index]));
@@ -884,7 +916,8 @@ class Interface {
                     clip = AudioSystem.getClip();
                     clip.open(audioInputStream);
                     clip.start();
-                    int wait = (int)(1E-3 * clip.getMicrosecondLength()), delayDuration = 10;
+                    wait = (int)(1E-3 * clip.getMicrosecondLength());
+                    delayDuration = 10;
                     for(int i = 0; i < wait / delayDuration; i++) {
                         if(this.killed) {
                             clip.close();
