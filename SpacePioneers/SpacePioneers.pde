@@ -36,7 +36,7 @@ void settings() {
 void setup() {
     frameRate(FPS);
     noCursor();
-    
+
     iface = new Interface();
 }
 
