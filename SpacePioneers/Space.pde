@@ -157,7 +157,7 @@ class Space {
         while(true) {
             lastEA = ea;
             lastDiff = diff;
-            ea = ea - (ea - e * sin(ea) - ma) / (1 - e * cos(ea));
+            ea = ea - (ea - e * sin(ea) - ma) / (1.0 - e * cos(ea));
             diff = abs(ma - (ea - e * sin(ea)));
 
             if(diff == 0.0)
@@ -169,14 +169,14 @@ class Space {
             }
         }
 
-        ta = 2 * atan2(sqrt(1 + e) * sin(ea / 2), sqrt(1 - e) * cos(ea / 2));
+        ta = 2.0 * atan2(sqrt(1.0 + e) * sin(ea / 2.0), sqrt(1.0 - e) * cos(ea / 2.0));
 
-        distance = sma * (1 - e * cos(ea));
+        distance = sma * (1.0 - e * cos(ea));
 
         prePosX = distance * cos(ta);
         prePosY = distance * sin(ta);
         preVelX = sqrt(this.gConst * sma * orbitMass) / distance * -sin(ea);
-        preVelY = sqrt(this.gConst * sma * orbitMass) / distance * sqrt(1 - e*e) * cos(ea);
+        preVelY = sqrt(this.gConst * sma * orbitMass) / distance * sqrt(1.0 - e * e) * cos(ea);
 
         posX = prePosX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - prePosY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
         posY = prePosX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - prePosY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
@@ -230,7 +230,7 @@ class Space {
 
         float distance = obj1.getRadius() + obj2.getRadius();
 
-        if (x*x + y*y + z*z < distance*distance)
+        if (x * x + y * y + z * z < distance * distance)
             return true;
         return false;
     }
@@ -242,8 +242,8 @@ class Space {
         PVector vel1 = obj1.getVel().mult(mass1);
         PVector vel2 = obj2.getVel().mult(mass2);
 
-        float volume = (pow(obj1.getRadius(), 3) + pow(obj2.getRadius(), 3)) * 4/3.0 * PI;
-        float radius = pow(volume * 3/4.0 / PI, 1/3.0);
+        float volume = (pow(obj1.getRadius(), 3) + pow(obj2.getRadius(), 3)) * 4.0 / 3.0 * PI;
+        float radius = pow(volume * 3.0 / 4.0 / PI, 1.0 / 3.0);
 
         vector.add(vel1);
         vector.add(vel2);

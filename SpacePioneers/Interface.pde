@@ -51,6 +51,9 @@ class Interface {
     private Button fieldIP, fieldPort;
     private Button[] worlds;
 
+    private boolean pause;
+    private float speed;
+
     private ButtonServer buttonServer;
 
     private PImage[] buffer;
@@ -66,7 +69,6 @@ class Interface {
     private Camera camera;
 
     private PShape skybox;
-    private boolean pause;
 
     private int timeLastPress, timeBetweenPresses;
 
@@ -76,34 +78,37 @@ class Interface {
 
         this.context = 0;
 
+        this.pause = false;
+        this.speed = 1.0;
+
         float w, h, x, y0;
         w = width;
-        h = height / 16;
-        x = h / 10;
-        y0 = h / 10;
-        this.buttonBack = new Button(x, y0, w - 2 * x, h, "BACK");
-        w = width / 8;
-        h = height / 16;
-        x = (width - w) / 2;
-        this.buttonPlay = new Button(x, height / 5 * 2.5 - h * 2, w, h, "PLAY");
-        this.buttonSettings = new Button(x, height / 5 * 3 - h * 2, w, h, "SETTINGS");
-        this.buttonCredits = new Button(x, height / 5 * 3.5 - h * 2, w, h, "CREDITS");
-        this.buttonContinue = new Button(x, height / 5 * 2.5 - h * 2, w, h, "CONTINUE");
-        this.buttonQuit = new Button(x, height / 5 * 3.5 - h * 2, w, h, "QUIT");
-        w = width / 8;
-        h = height / 8;
+        h = height / 16.0;
+        x = h / 10.0;
+        y0 = h / 10.0;
+        this.buttonBack = new Button(x, y0, w - 2.0 * x, h, "BACK");
+        w = width / 8.0;
+        h = height / 16.0;
+        x = (width - w) / 2.0;
+        this.buttonPlay = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
+        this.buttonSettings = new Button(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
+        this.buttonCredits = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
+        this.buttonContinue = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "CONTINUE");
+        this.buttonQuit = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "QUIT");
+        w = width / 8.0;
+        h = height / 8.0;
         x = width - w;
-        this.buttonSingleplayer = new Button(x - h / 10, height / 5 * 2 - h * 3 / 2, w, h, "SINGLEPLAYER");
-        this.buttonMultiplayer = new Button(x - h / 10, height / 5 * 3 - h * 3 / 2, w, h, "MULTIPLAYER");
-        this.buttonEditor = new Button(x - h / 10, height / 5 * 4 - h * 3 / 2, w, h, "EDITOR");
-        w = width / 4;
-        h = height / 16;
-        x = (width - w) / 2;
-        y0 = height / 2 - h * 2;
-        this.fieldIP = new Button(x, y0 + h * 0, w, h, "0.0.0.0");
-        this.fieldPort = new Button(x, y0 + h * 1, w, h, "16384");
-        this.buttonHost = new Button(x, y0 + h * 2, w, h, "HOST");
-        this.buttonConnect = new Button(x, y0 + h * 3, w, h, "CONNECT");
+        this.buttonSingleplayer = new Button(x - h / 10.0, height / 5.0 * 2.0 - h * 3.0 / 2.0, w, h, "SINGLEPLAYER");
+        this.buttonMultiplayer = new Button(x - h / 10.0, height / 5.0 * 3.0 - h * 3.0 / 2.0, w, h, "MULTIPLAYER");
+        this.buttonEditor = new Button(x - h / 10.0, height / 5.0 * 4.0 - h * 3.0 / 2.0, w, h, "EDITOR");
+        w = width / 4.0;
+        h = height / 16.0;
+        x = (width - w) / 2.0;
+        y0 = height / 2.0 - h * 2.0;
+        this.fieldIP = new Button(x, y0 + h * 0.0, w, h, "0.0.0.0");
+        this.fieldPort = new Button(x, y0 + h * 1.0, w, h, "16384");
+        this.buttonHost = new Button(x, y0 + h * 2.0, w, h, "HOST");
+        this.buttonConnect = new Button(x, y0 + h * 3.0, w, h, "CONNECT");
 
         this.buttonServer = new ButtonServer();
         this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
@@ -125,7 +130,6 @@ class Interface {
         this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
 
         this.camera = new Camera();
-        this.pause = false;
 
         this.timeLastPress = 0;
         this.timeBetweenPresses = 300;
@@ -183,8 +187,8 @@ class Interface {
             this.drawBackground();
 
             ArrayList<Button> buttonsList = new ArrayList<Button>();
-            float w = width / 2, h = height / 16;
-            float x = (width - w) / 2, y0 = height / 8;
+            float w = width / 2.0, h = height / 16.0;
+            float x = (width - w) / 2.0, y0 = height / 8.0;
             for(String name : this.db.getXMLs())
                 buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
             this.worlds = new Button[buttonsList.size()];
@@ -212,16 +216,16 @@ class Interface {
             this.context = 0;
         }
 
-        float w = width / 10, h = height / 10;
+        float w = width / 10.0, h = height / 10.0;
         fill(0, 127);
         stroke(255);
-        strokeWeight(h / 10);
-        rect(w, h, width - w * 2, height - h * 2, h / 2, h / 2, h / 2, h / 2);
+        strokeWeight(h / 10.0);
+        rect(w, h, width - w * 2.0, height - h * 2.0, h / 2.0, h / 2.0, h / 2.0, h / 2.0);
         fill(255);
         stroke(0);
         strokeWeight(1);
         textSize(24);
-        text(this.creditsContent, (width - textWidth(this.creditsContent)) / 2, height / 2 - h * 2);
+        text(this.creditsContent, (width - textWidth(this.creditsContent)) / 2.0, height / 2.0 - h * 2.0);
         noFill();
     }
 
@@ -443,11 +447,11 @@ class Interface {
     private void playMenu() {
         camera();
 
-        float w = width / 4, h = height / 4;
+        float w = width / 4.0, h = height / 4.0;
         fill(0, 127);
         stroke(255);
-        strokeWeight(h / 10);
-        rect(w, h, width - w * 2, height - h * 2, h / 2, h / 2, h / 2, h / 2);
+        strokeWeight(h / 10.0);
+        rect(w, h, width - w * 2.0, height - h * 2.0, h / 2.0, h / 2.0, h / 2.0, h / 2.0);
 
         this.buttonServer.serve(this.context);
 
@@ -496,8 +500,8 @@ class Interface {
             else
                 fill(0, 127);
             stroke(255);
-            strokeWeight(this.h / 10);
-            rect(this.x, this.y, this.w, this.h, this.h / 2, this.h / 2, this.h / 2, this.h / 2);
+            strokeWeight(this.h / 10.0);
+            rect(this.x, this.y, this.w, this.h, this.h / 2.0, this.h / 2.0, this.h / 2.0, this.h / 2.0);
             if(this.active)
                 fill(0);
             else
@@ -505,7 +509,7 @@ class Interface {
             stroke(0);
             strokeWeight(1);
             textSize(16);
-            text(this.content, this.x + (this.w - textWidth(this.content)) / 2, this.y + this.h / 2);
+            text(this.content, this.x + (this.w - textWidth(this.content)) / 2.0, this.y + this.h / 2.0);
             noFill();
         }
 
@@ -720,16 +724,16 @@ class Interface {
 
 
         public Camera() {
-            this.posX = this.posY = this.posZ = 0;
-            this.forwardX = this.forwardY = 0;
-            this.forwardZ = 1;
-            this.upX = this.upZ = 0;
-            this.upY = 1;
-            this.rightX = 1;
-            this.rightY = this.rightZ = 0;
+            this.posX = this.posY = this.posZ = 0.0;
+            this.forwardX = this.forwardY = 0.0;
+            this.forwardZ = 1.0;
+            this.upX = this.upZ = 0.0;
+            this.upY = 1.0;
+            this.rightX = 1.0;
+            this.rightY = this.rightZ = 0.0;
             this.angleSpeed = TWO_PI / FPS * 3E-1;
             this.speed = 1E2;
-            this.zoom = 1;
+            this.zoom = 1.0;
             this.mode = 0;
 
             try {
@@ -741,6 +745,10 @@ class Interface {
         public void begin() {
             beginCamera();
             camera(this.posX, this.posY, this.posZ, this.forwardX + this.posX, this.forwardY + this.posY, this.forwardZ + this.posZ, this.upX, this.upY, this.upZ);
+
+            float fov = PI / 3.0 / zoom;
+            float cameraZ = (height / 2.0) / tan(fov / 2.0);
+            perspective(fov, width / height, cameraZ / 100.0, cameraZ * 100.0);
         }
 
         public void begin(PShape skybox) {
@@ -884,6 +892,16 @@ class Interface {
                     this.upY = vector.y;
                     this.upZ = vector.z;
                 }
+                if(key == '-') {
+                    this.zoom -= this.zoom / 1E2;
+                    if(this.zoom < 5E-1)
+                        this.zoom = 5E-1;
+                }
+                if(key == '+') {
+                    this.zoom += this.zoom / 1E2;
+                    if(this.zoom > 3600.0)
+                        this.zoom = 3600.0;
+                }
             }
         }
 
@@ -896,7 +914,7 @@ class Interface {
             p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0 + (a[3]) * (p[1]);
             p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0;
 
-            p[0] = (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
+            p[0] = + (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
             p[1] = - (p[0]) * (a[1]) + (p[1]) * (a[0]) - (p[2]) * (a[3]) + (p[3]) * (a[2]);
             p[2] = - (p[0]) * (a[2]) + (p[1]) * (a[3]) + (p[2]) * (a[0]) - (p[3]) * (a[1]);
             p[3] = - (p[0]) * (a[3]) - (p[1]) * (a[2]) + (p[2]) * (a[1]) + (p[3]) * (a[0]);

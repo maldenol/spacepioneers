@@ -84,17 +84,16 @@ class Database {
 
     public PImage getTexture(String fileName) {
         PImage result;
-        int ex;
         try {
             result = loadImage(sketchPath() + "/data/textures/" + fileName + ".jpg");
             if(result == null)
-                ex = 1/0;
+                throw new NullPointerException();
             return result;
         } catch(Exception e) {
             try {
                 result = loadImage(sketchPath() + "/data/textures/" + fileName + ".png");
                 if(result == null)
-                    ex = 1/0;
+                    throw new NullPointerException();
                 return result;
             } catch(Exception ee) {
                 return new PImage(1, 1, RGB);
