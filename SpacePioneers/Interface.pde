@@ -21,6 +21,8 @@
       Camera class
       Button class
       ButtonServer class
+      Key class
+      KeyServer class
       TextureLoaderThread class that extends Thread
       SoundtrackThread class that extends Thread
   Malovanyi Denys Olehovych
@@ -36,6 +38,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Iterator;
 
 
 class Interface {
@@ -55,6 +58,7 @@ class Interface {
     private float speed;
 
     private ButtonServer buttonServer;
+    private KeyServer keyServer;
 
     private PImage[] buffer;
     private int xo, yo, swap;
@@ -69,8 +73,6 @@ class Interface {
     private Camera camera;
 
     private PShape skybox;
-
-    private int timeLastPress, timeBetweenPresses;
 
 
     public Interface() {
@@ -111,13 +113,16 @@ class Interface {
         this.buttonConnect = new Button(x, y0 + h * 3.0, w, h, "CONNECT");
 
         this.buttonServer = new ButtonServer();
-        this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonContinue, this.buttonQuit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}});
-        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonHost, this.buttonConnect}, new Button[]{}, new Button[]{this.fieldIP, this.fieldPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}});
+        this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // menu
+        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // credits
+        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // settings
+        this.buttonServer.addContext(new Button[]{this.buttonContinue, this.buttonQuit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // play menu
+        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // editor
+        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
+        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonHost, this.buttonConnect}, new Button[]{}, new Button[]{this.fieldIP, this.fieldPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // choose host
+
+        this.keyServer = new KeyServer();
+        this.keyServer.addKey('`');
 
         this.xo = this.yo = this.swap = 0;
         this.buffer = new PImage[2];
@@ -130,9 +135,6 @@ class Interface {
         this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
 
         this.camera = new Camera();
-
-        this.timeLastPress = 0;
-        this.timeBetweenPresses = 300;
     }
 
     public void draw() {
@@ -165,10 +167,9 @@ class Interface {
     }
 
     private void menu() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 1;
-            this.timeLastPress = millis();
         }
 
         this.drawBackground();
@@ -196,15 +197,14 @@ class Interface {
 
             this.context = 5;
 
-            this.buttonServer.setContext(this.context, new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}});
+            this.buttonServer.setContext(this.context, new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}}); // play
         }
     }
 
     private void credits() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 0;
-            this.timeLastPress = millis();
         }
 
         this.drawBackground();
@@ -230,10 +230,9 @@ class Interface {
     }
 
     private void settings() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 0;
-            this.timeLastPress = millis();
         }
 
         this.drawBackground();
@@ -247,13 +246,12 @@ class Interface {
     }
 
     private void play() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.pause = !this.pause;
             try {
                 Robot mouse = new Robot();
                 mouse.mouseMove((int)(HALF_WIDTH), (int)(HALF_HEIGHT));
             } catch(AWTException e) {}
-            this.timeLastPress = millis();
         }
 
         if(!this.pause) {
@@ -271,10 +269,9 @@ class Interface {
     }
 
     private void editor() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 0;
-            this.timeLastPress = millis();
         }
 
         this.camera.controls();
@@ -285,10 +282,9 @@ class Interface {
     }
 
     private void chooseWorld() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 0;
-            this.timeLastPress = millis();
         }
 
         this.drawBackground();
@@ -367,10 +363,9 @@ class Interface {
     }
 
     private void chooseHost() {
-        if(keyPressed && key == 96 && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+        if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 5;
-            this.timeLastPress = millis();
         }
 
         this.drawBackground();
@@ -400,6 +395,7 @@ class Interface {
 
     private void drawBackground() {
         camera();
+        perspective();
         background(0);
 
         if(this.swap == 1) {
@@ -446,6 +442,7 @@ class Interface {
 
     private void playMenu() {
         camera();
+        perspective();
 
         float w = width / 4.0, h = height / 4.0;
         fill(0, 127);
@@ -462,6 +459,11 @@ class Interface {
         noFill();
 
         if(this.buttonContinue.isActive()) {
+            try {
+                Robot mouse = new Robot();
+                mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
+            } catch(AWTException e) {}
+
             this.buttonServer.clear(this.context);
             this.pause = false;
         } else if(this.buttonSettings.isActive()) {
@@ -637,13 +639,13 @@ class Interface {
             }
 
             for(Button[] buttonList : this.buttonsLists.get(context)) {
-                for(Button element : buttonList) {
-                    element.draw();
+                for(Button button : buttonList) {
+                    button.draw();
 
-                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                        element.activate();
+                    if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        button.activate();
                         for(Button e : buttonList)
-                            if(e != element)
+                            if(e != button)
                                 e.deactivate();
                         this.timeLastPress = millis();
                     }
@@ -651,36 +653,36 @@ class Interface {
             }
 
             for(Button[] flagList : this.flagsLists.get(context)) {
-                for(Button element : flagList) {
-                    element.draw();
+                for(Button button : flagList) {
+                    button.draw();
 
-                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                        element.toggle();
+                    if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        button.toggle();
                         this.timeLastPress = millis();
                     }
                 }
             }
 
             for(Button[] fieldList : this.fieldsLists.get(context)) {
-                for(Button element : fieldList) {
-                    element.draw();
+                for(Button button : fieldList) {
+                    button.draw();
 
-                    if(element.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                        element.activate();
+                    if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        button.activate();
                         for(Button[] fL : this.fieldsLists.get(context))
                             for(Button e : fL)
-                                if(e != element)
+                                if(e != button)
                                     e.deactivate();
                         this.timeLastPress = millis();
                     }
 
-                    if(element.isActive())
+                    if(button.isActive())
                         if(keyPressed) {
                             if(!this.fieldPressed || this.fieldLastChar != key) {
                                 if(keyCode == BACKSPACE)
-                                    element.pop();
+                                    button.pop();
                                 else if(key != CODED)
-                                    element.push(key);
+                                    button.push(key);
                                 this.fieldLastChar = key;
                             }
                             this.fieldPressed = true;
@@ -701,18 +703,87 @@ class Interface {
                 field.deactivate();
 
             for(Button[] buttonsList : this.buttonsLists.get(context))
-                for(Button element : buttonsList)
-                    element.deactivate();
+                for(Button button : buttonsList)
+                    button.deactivate();
 
             for(Button[] flagsList : this.flagsLists.get(context))
-                for(Button element : flagsList)
-                    element.deactivate();
+                for(Button button : flagsList)
+                    button.deactivate();
 
             for(Button[] fieldsList : this.fieldsLists.get(context))
-                for(Button element : fieldsList)
-                    element.deactivate();
+                for(Button button : fieldsList)
+                    button.deactivate();
         }
     }
+
+
+    private class Key {
+        private char content;
+        private int timeLastPress, timeBetweenPresses;
+
+
+        public Key(char content) {
+            this.content = content;
+
+            this.timeLastPress = 0;
+            this.timeBetweenPresses = 300;
+        }
+
+
+        public boolean isPressed() {
+            return (keyPressed && key == this.content);
+        }
+
+        public boolean isClicked() {
+            if(keyPressed && key == this.content && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                this.timeLastPress = millis();
+                return true;
+            }
+            return false;
+        }
+
+        public char getContent() {
+            return this.content;
+        }
+    }
+
+    private class KeyServer {
+        private ArrayList<Key> keys;
+
+
+        public KeyServer() {
+            this.keys = new ArrayList<Key>();
+        }
+
+
+        public void addKey(char content) {
+            this.keys.add(new Key(content));
+        }
+
+        public void removeKey(char content) {
+            Iterator<Key> iter = this.keys.iterator();
+            while (iter.hasNext())
+                if(iter.next().getContent() == content)
+                    iter.remove();
+        }
+
+        public boolean isPressed(char content) {
+            for(Key key : this.keys) {
+                if(key.getContent() == content)
+                    return key.isPressed();
+            }
+            return false;
+        }
+
+        public boolean isClicked(char content) {
+            for(Key key : this.keys) {
+                if(key.getContent() == content)
+                    return key.isClicked();
+            }
+            return false;
+        }
+    }
+
 
     private class Camera {
         private float posX, posY, posZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
@@ -748,7 +819,7 @@ class Interface {
 
             float fov = PI / 3.0 / zoom;
             float cameraZ = (height / 2.0) / tan(fov / 2.0);
-            perspective(fov, width / height, cameraZ / 100.0, cameraZ * 100.0);
+            perspective(fov, float(width) / float(height), cameraZ / 100.0, cameraZ * 100.0);
         }
 
         public void begin(PShape skybox) {

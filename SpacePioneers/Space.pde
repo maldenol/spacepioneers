@@ -70,7 +70,7 @@ class Space {
         XML parent;
         float[][] result;
 
-        for (int i = 0; i < parents.length; i++) {
+        for(int i = 0; i < parents.length; i++) {
             posX = parents[i].getFloat("posX") * this.valuesKoefficient;
             posY = parents[i].getFloat("posY") * this.valuesKoefficient;
             posZ = parents[i].getFloat("posZ") * this.valuesKoefficient;
@@ -189,21 +189,19 @@ class Space {
     }
 
     public void tick() {
-        Iterator<Body> iter = bodies.iterator();
-
         PVector force;
-
-        while (iter.hasNext()) {
+        Iterator<Body> iter = bodies.iterator();
+        while(iter.hasNext()) {
             Body obj1 = iter.next();
 
-            if (obj1.isDeleted())
+            if(obj1.isDeleted())
                 iter.remove();
             else {
-                for (Body obj2 : this.bodies) {
-                    if (obj1 == obj2)
+                for(Body obj2 : this.bodies) {
+                    if(obj1 == obj2)
                         continue;
 
-                    if (this.isCollide(obj1, obj2))
+                    if(this.isCollide(obj1, obj2))
                         this.collide(obj1, obj2);
 
                     force = this.gForce(obj1, obj2);
@@ -230,7 +228,7 @@ class Space {
 
         float distance = obj1.getRadius() + obj2.getRadius();
 
-        if (x * x + y * y + z * z < distance * distance)
+        if(x * x + y * y + z * z < distance * distance)
             return true;
         return false;
     }
@@ -249,7 +247,7 @@ class Space {
         vector.add(vel2);
         vector.div(mass1 + mass2);
 
-        if (mass1 >= mass2) {
+        if(mass1 >= mass2) {
             obj1.setVel(vector);
             obj1.setRadius(radius);
             obj2.delete();
@@ -283,7 +281,7 @@ class Space {
 
         noStroke();
         fill(255);
-        for (Body item : this.bodies) {
+        for(Body item : this.bodies) {
             pos = item.getPos();
             angle = item.getAnglePos();
 
