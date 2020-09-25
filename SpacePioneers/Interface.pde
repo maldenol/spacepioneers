@@ -275,6 +275,7 @@ class Interface {
         }
 
         this.camera.controls();
+
         background(0);
         this.camera.begin(this.skybox);
         this.space.draw();
@@ -296,8 +297,15 @@ class Interface {
             this.context = 0;
         }
 
-        if(this.buttonSingleplayer.isActive()) {
-            for(Button button : this.worlds) {
+        int choose = 0;
+        if(this.buttonSingleplayer.isActive())
+            choose = 1;
+        else if(this.buttonMultiplayer.isActive())
+            choose = 2;
+        else if(this.buttonEditor.isActive())
+            choose = 3;
+        if(choose != 0) {
+            for(Button button : this.worlds)
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
 
@@ -323,42 +331,20 @@ class Interface {
                     this.soundtrack.kill();
                     this.soundtrack = null;
 
-                    this.context = 3;
+                    try {
+                        Robot mouse = new Robot();
+                        mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
+                    } catch(AWTException e) {}
 
                     break;
                 }
-            }
-        } else if(this.buttonMultiplayer.isActive()) {
-            for(Button button : this.worlds) {
-                if(button.isActive()) {
-                    this.buttonServer.clear(this.context);
 
-                    this.drawBackground();
-
-                    this.context = 6;
-
-                    break;
-                }
-            }
-        } else if(this.buttonEditor.isActive()) {
-            for(Button button : this.worlds) {
-                if(button.isActive()) {
-                    this.buttonServer.clear(this.context);
-
-                    this.drawBackground();
-
-                    this.camera = new Camera();
-                    this.pause = false;
-
-                    this.textureLoader.kill();
-                    this.textureLoader = null;
-
-                    this.soundtrack.kill();
-                    this.soundtrack = null;
-
-                    break;
-                }
-            }
+            if(choose == 1)
+                this.context = 3;
+            else if(choose == 2)
+                this.context = 6;
+            else if(choose == 3)
+                this.context = 4;
         }
     }
 
@@ -787,7 +773,7 @@ class Interface {
 
     private class Camera {
         private float posX, posY, posZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
-        private float speed, angleSpeed;
+        private float speed, angleSpeed, ratioPitchAndYawToRoll;
         private float zoom;
         private int mode;
 
@@ -802,7 +788,8 @@ class Interface {
             this.upY = 1.0;
             this.rightX = 1.0;
             this.rightY = this.rightZ = 0.0;
-            this.angleSpeed = TWO_PI / FPS * 3E-1;
+            this.angleSpeed = TWO_PI / FPS * 2E-1;
+            this.ratioPitchAndYawToRoll = 4;
             this.speed = 1E2;
             this.zoom = 1.0;
             this.mode = 0;
@@ -840,7 +827,7 @@ class Interface {
 
             if(mouseX != pmouseX || mouseY != pmouseY) {
                 if(mouseX != pmouseX) { // rotate left or right
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed));
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.ratioPitchAndYawToRoll);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -863,7 +850,7 @@ class Interface {
                 }
 
                 if(mouseY != pmouseY) { // rotate up or down
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed));
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.ratioPitchAndYawToRoll);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;

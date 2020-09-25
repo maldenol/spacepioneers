@@ -23,8 +23,8 @@
 
 
 
-final int FPS = 60;
-final float HALF_WIDTH = width / 2.0, HALF_HEIGHT = height / 2.0;
+int FPS;
+float HALF_WIDTH, HALF_HEIGHT;
 
 Interface iface;
 
@@ -34,6 +34,10 @@ void settings() {
 }
 
 void setup() {
+    FPS = 60;
+    HALF_WIDTH = width / 2.0;
+    HALF_HEIGHT = height / 2.0;
+
     frameRate(FPS);
     noCursor();
 
