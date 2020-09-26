@@ -46,13 +46,14 @@ class Interface {
 
     private int context;
 
-    private Button buttonBack;
-    private Button buttonCredits, buttonSettings, buttonPlay;
-    private Button buttonContinue, buttonQuit;
-    private Button buttonSingleplayer, buttonMultiplayer, buttonEditor;
-    private Button buttonHost, buttonConnect;
-    private Button fieldIP, fieldPort;
-    private Button[] worlds;
+    private Button buttonMenuBack;
+    private Button buttonMenuCredits, buttonMenuSettings, buttonMenuPlay;
+    private Button buttonPlayMenu, buttonPlayResume, buttonPlaySettings, buttonPlayExit;
+    private Button buttonEditorMenu, buttonEditorResume, buttonEditorSettings, buttonEditorExit, buttonEditorSave;
+    private Button buttonMenuSingleplayer, buttonMenuMultiplayer, buttonMenuEditor;
+    private Button buttonMenuHost, buttonMenuConnect;
+    private Button fieldMenuIP, fieldMenuPort;
+    private Button[] buttonsMenuWorlds, buttonsEditorBodies;
 
     private boolean pause;
     private float speed;
@@ -88,38 +89,51 @@ class Interface {
         h = height / 16.0;
         x = h / 10.0;
         y0 = h / 10.0;
-        this.buttonBack = new Button(x, y0, w - 2.0 * x, h, "BACK");
+        this.buttonMenuBack = new Button(x, y0, w - 2.0 * x, h, "BACK");
+        w = width / 4.0;
+        h = height / 4.0;
+        this.buttonPlayMenu = new Button(w, h, width - w * 2.0, height - h * 2.0, h / 16.0, h / 4.0, "");
         w = width / 8.0;
         h = height / 16.0;
         x = (width - w) / 2.0;
-        this.buttonPlay = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
-        this.buttonSettings = new Button(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
-        this.buttonCredits = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
-        this.buttonContinue = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "CONTINUE");
-        this.buttonQuit = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "QUIT");
+        this.buttonMenuPlay = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
+        this.buttonMenuSettings = new Button(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
+        this.buttonMenuCredits = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
+        this.buttonPlayResume = new Button(x + 1, height / 5.0 * 2.5 - h * 2.0 + 1, w, h, "RESUME");
+        this.buttonPlaySettings = new Button(x + 1, height / 5.0 * 3.0 - h * 2.0 + 1, w, h, "SETTINGS");
+        this.buttonPlayExit = new Button(x + 1, height / 5.0 * 3.5 - h * 2.0 + 1, w, h, "EXIT");
+        w = width / 3.0;
+        this.buttonEditorMenu = new Button(width - w, -5.0, width, height + 5.0, 5.0, 0.0, "");
+        w = width / 8.0;
+        h = height / 4.0;
+        x = 0;
+        this.buttonEditorSave = new Button(x, h * 0.0, w, h, 2.0, 5.0, "SAVE");
+        this.buttonEditorResume = new Button(x, h * 1.0, w, h, 2.0, 5.0, "RESUME");
+        this.buttonEditorSettings = new Button(x, h * 2.0, w, h, 2.0, 5.0, "SETTINGS");
+        this.buttonEditorExit = new Button(x, h * 3.0, w, h, 2.0, 5.0, "EXIT");
         w = width / 8.0;
         h = height / 8.0;
         x = width - w;
-        this.buttonSingleplayer = new Button(x - h / 10.0, height / 5.0 * 2.0 - h * 3.0 / 2.0, w, h, "SINGLEPLAYER");
-        this.buttonMultiplayer = new Button(x - h / 10.0, height / 5.0 * 3.0 - h * 3.0 / 2.0, w, h, "MULTIPLAYER");
-        this.buttonEditor = new Button(x - h / 10.0, height / 5.0 * 4.0 - h * 3.0 / 2.0, w, h, "EDITOR");
+        this.buttonMenuSingleplayer = new Button(x - h / 10.0, height / 5.0 * 2.0 - h * 3.0 / 2.0, w, h, "SINGLEPLAYER");
+        this.buttonMenuMultiplayer = new Button(x - h / 10.0, height / 5.0 * 3.0 - h * 3.0 / 2.0, w, h, "MULTIPLAYER");
+        this.buttonMenuEditor = new Button(x - h / 10.0, height / 5.0 * 4.0 - h * 3.0 / 2.0, w, h, "EDITOR");
         w = width / 4.0;
         h = height / 16.0;
         x = (width - w) / 2.0;
         y0 = height / 2.0 - h * 2.0;
-        this.fieldIP = new Button(x, y0 + h * 0.0, w, h, "0.0.0.0");
-        this.fieldPort = new Button(x, y0 + h * 1.0, w, h, "16384");
-        this.buttonHost = new Button(x, y0 + h * 2.0, w, h, "HOST");
-        this.buttonConnect = new Button(x, y0 + h * 3.0, w, h, "CONNECT");
+        this.fieldMenuIP = new Button(x, y0 + h * 0.0, w, h, "0.0.0.0");
+        this.fieldMenuPort = new Button(x, y0 + h * 1.0, w, h, "16384");
+        this.buttonMenuHost = new Button(x, y0 + h * 2.0, w, h, "HOST");
+        this.buttonMenuConnect = new Button(x, y0 + h * 3.0, w, h, "CONNECT");
 
         this.buttonServer = new ButtonServer();
-        this.buttonServer.addContext(new Button[]{this.buttonPlay, this.buttonSettings, this.buttonCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // menu
-        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // credits
-        this.buttonServer.addContext(new Button[]{this.buttonBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // settings
-        this.buttonServer.addContext(new Button[]{this.buttonContinue, this.buttonQuit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // play menu
-        this.buttonServer.addContext(new Button[]{}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // editor
-        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
-        this.buttonServer.addContext(new Button[]{this.buttonBack, this.buttonHost, this.buttonConnect}, new Button[]{}, new Button[]{this.fieldIP, this.fieldPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // choose host
+        this.buttonServer.addContext(new Button[]{this.buttonMenuPlay, this.buttonMenuSettings, this.buttonMenuCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // main menu
+        this.buttonServer.addContext(new Button[]{this.buttonMenuBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // credits
+        this.buttonServer.addContext(new Button[]{this.buttonMenuBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // settings
+        this.buttonServer.addContext(new Button[]{this.buttonPlayMenu, this.buttonPlayResume, this.buttonPlaySettings, this.buttonPlayExit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // play menu
+        this.buttonServer.addContext(new Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // editor menu
+        this.buttonServer.addContext(new Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsMenuWorlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
+        this.buttonServer.addContext(new Button[]{this.buttonMenuBack, this.buttonMenuHost, this.buttonMenuConnect}, new Button[]{}, new Button[]{this.fieldMenuIP, this.fieldMenuPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // choose host
 
         this.keyServer = new KeyServer();
         this.keyServer.addKey('`');
@@ -140,7 +154,7 @@ class Interface {
     public void draw() {
         switch(this.context) {
             case 0:
-                this.menu();
+                this.mainMenu();
                 break;
             case 1:
                 this.credits();
@@ -166,7 +180,7 @@ class Interface {
         }
     }
 
-    private void menu() {
+    private void mainMenu() {
         if(this.keyServer.isClicked('`')) {
             this.buttonServer.clear(this.context);
             this.context = 1;
@@ -176,13 +190,13 @@ class Interface {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonCredits.isActive()) {
+        if(this.buttonMenuCredits.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 1;
-        } else if(this.buttonSettings.isActive()) {
+        } else if(this.buttonMenuSettings.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 2;
-        } else if(this.buttonPlay.isActive()) {
+        } else if(this.buttonMenuPlay.isActive()) {
             this.buttonServer.clear(this.context);
 
             this.drawBackground();
@@ -190,14 +204,15 @@ class Interface {
             ArrayList<Button> buttonsList = new ArrayList<Button>();
             float w = width / 2.0, h = height / 16.0;
             float x = (width - w) / 2.0, y0 = height / 8.0;
-            for(String name : this.db.getXMLs())
+            for(String name : this.db.getXMLs()) {
                 buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
-            this.worlds = new Button[buttonsList.size()];
-            this.worlds = buttonsList.toArray(this.worlds);
+            }
+            this.buttonsMenuWorlds = new Button[buttonsList.size()];
+            this.buttonsMenuWorlds = buttonsList.toArray(this.buttonsMenuWorlds);
 
             this.context = 5;
 
-            this.buttonServer.setContext(this.context, new Button[]{this.buttonBack, this.buttonSingleplayer, this.buttonMultiplayer, this.buttonEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.worlds}, new Button[][]{{}}, new Button[][]{{}}); // play
+            this.buttonServer.setContext(this.context, new Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsMenuWorlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
         }
     }
 
@@ -211,7 +226,7 @@ class Interface {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonBack.isActive()) {
+        if(this.buttonMenuBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
@@ -239,7 +254,7 @@ class Interface {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonBack.isActive()) {
+        if(this.buttonMenuBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
@@ -264,22 +279,28 @@ class Interface {
         this.space.draw();
         this.camera.end();
 
-        if(this.pause)
+        if(this.pause) {
             this.playMenu();
+        }
     }
 
     private void editor() {
         if(this.keyServer.isClicked('`')) {
-            this.buttonServer.clear(this.context);
-            this.context = 0;
+            this.pause = !this.pause;
         }
 
-        this.camera.controls();
+        if(!this.pause) {
+            this.camera.controls();
+        }
 
         background(0);
         this.camera.begin(this.skybox);
         this.space.draw();
         this.camera.end();
+
+        if(this.pause) {
+            this.editorMenu();
+        }
     }
 
     private void chooseWorld() {
@@ -292,20 +313,21 @@ class Interface {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonBack.isActive()) {
+        if(this.buttonMenuBack.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
 
         int choose = 0;
-        if(this.buttonSingleplayer.isActive())
+        if(this.buttonMenuSingleplayer.isActive()) {
             choose = 1;
-        else if(this.buttonMultiplayer.isActive())
+        } else if(this.buttonMenuMultiplayer.isActive()) {
             choose = 2;
-        else if(this.buttonEditor.isActive())
+        } else if(this.buttonMenuEditor.isActive()) {
             choose = 3;
+        }
         if(choose != 0) {
-            for(Button button : this.worlds)
+            for(Button button : this.buttonsMenuWorlds) {
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
 
@@ -338,13 +360,26 @@ class Interface {
 
                     break;
                 }
+            }
 
-            if(choose == 1)
+            if(choose == 1) {
                 this.context = 3;
-            else if(choose == 2)
+            } else if(choose == 2) {
                 this.context = 6;
-            else if(choose == 3)
+            } else if(choose == 3) {
+                ArrayList<Button> buttonsList = new ArrayList<Button>();
+                float w = width / 2.0, h = height / 16.0;
+                float x = (width - w) / 2.0, y0 = height / 8.0;
+                for(String name : this.db.getXMLs()) {
+                    buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
+                }
+                this.buttonsEditorBodies = new Button[buttonsList.size()];
+                this.buttonsEditorBodies = buttonsList.toArray(this.buttonsEditorBodies);
+
                 this.context = 4;
+
+                this.buttonServer.setContext(this.context, new Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsEditorBodies}, new Button[][]{{}}, new Button[][]{{}}); // editor
+            }
         }
     }
 
@@ -358,18 +393,18 @@ class Interface {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonBack.isActive()) {
+        if(this.buttonMenuBack.isActive()) {
             this.buttonServer.clear(this.context);
 
             this.context = 5;
-        } else if(this.buttonHost.isActive()) {
+        } else if(this.buttonMenuHost.isActive()) {
             this.buttonServer.clear(this.context);
 
             try {
                 Robot mouse = new Robot();
                 mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
             } catch(AWTException e) {}
-        } else if(this.buttonConnect.isActive()) {
+        } else if(this.buttonMenuConnect.isActive()) {
             this.buttonServer.clear(this.context);
 
             try {
@@ -395,8 +430,9 @@ class Interface {
 
         this.xo = (this.xo + 1) % width;
 
-        if(this.xo == 0 && this.swap == 0)
+        if(this.xo == 0 && this.swap == 0) {
             this.swap = 1;
+        }
 
         if(this.swap == 1) {
             this.yo++;
@@ -430,11 +466,34 @@ class Interface {
         camera();
         perspective();
 
-        float w = width / 4.0, h = height / 4.0;
-        fill(0, 127);
+        this.buttonServer.serve(this.context);
+
         stroke(255);
-        strokeWeight(h / 10.0);
-        rect(w, h, width - w * 2.0, height - h * 2.0, h / 2.0, h / 2.0, h / 2.0, h / 2.0);
+        strokeWeight(2);
+        fill(0, 127);
+        circle(mouseX, mouseY, 8);
+        noFill();
+
+        if(this.buttonPlayResume.isActive()) {
+            try {
+                Robot mouse = new Robot();
+                mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
+            } catch(AWTException e) {}
+
+            this.buttonServer.clear(this.context);
+            this.pause = false;
+        } else if(this.buttonMenuSettings.isActive()) {
+            this.buttonServer.clear(this.context);
+            //this.context = 2;
+        } else if(this.buttonPlayExit.isActive()) {
+            this.buttonServer.clear(this.context);
+            this.context = 0;
+        }
+    }
+
+    public void editorMenu() {
+        camera();
+        perspective();
 
         this.buttonServer.serve(this.context);
 
@@ -444,7 +503,10 @@ class Interface {
         circle(mouseX, mouseY, 8);
         noFill();
 
-        if(this.buttonContinue.isActive()) {
+        if(this.buttonEditorSave.isActive()) {
+            this.buttonServer.clear(this.context);
+
+        } else if(this.buttonEditorResume.isActive()) {
             try {
                 Robot mouse = new Robot();
                 mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
@@ -452,10 +514,10 @@ class Interface {
 
             this.buttonServer.clear(this.context);
             this.pause = false;
-        } else if(this.buttonSettings.isActive()) {
+        } else if(this.buttonEditorSettings.isActive()) {
             this.buttonServer.clear(this.context);
-            this.context = 2;
-        } else if(this.buttonQuit.isActive()) {
+            //this.context = 2;
+        } else if(this.buttonEditorExit.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 0;
         }
@@ -463,7 +525,7 @@ class Interface {
 
 
     private class Button {
-        private float x, y, w, h;
+        private float x, y, w, h, b, c;
         private String content;
         private boolean active;
 
@@ -473,27 +535,41 @@ class Interface {
             this.y = y;
             this.w = w;
             this.h = h;
+            if(this.h <= this.w) {
+                this.b = this.h / 16.0;
+                this.c = this.h / 4.0;
+            } else {
+                this.b = this.w / 16.0;
+                this.c = this.w / 4.0;
+            }
             this.content = content;
             this.active = false;
         }
 
+        public Button(float x, float y, float w, float h, float b, float c, String content) {
+            this(x, y, w, h, content);
+            this.b = b;
+            this.c = c;
+        }
 
         public boolean isPressed() {
-            return (mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
+            return (this.content.length() > 0 && mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
         }
 
         public void draw() {
-            if(this.active)
+            if(this.active) {
                 fill(255, 127);
-            else
+            } else {
                 fill(0, 127);
+            }
             stroke(255);
-            strokeWeight(this.h / 10.0);
-            rect(this.x, this.y, this.w, this.h, this.h / 2.0, this.h / 2.0, this.h / 2.0, this.h / 2.0);
-            if(this.active)
+            strokeWeight(this.b);
+            rect(this.x, this.y, this.w, this.h, this.c, this.c, this.c, this.c);
+            if(this.active) {
                 fill(0);
-            else
+            } else {
                 fill(255);
+            }
             stroke(0);
             strokeWeight(1);
             textSize(16);
@@ -518,8 +594,9 @@ class Interface {
         }
 
         public void pop() {
-             if(this.content.length() >= 1)
+             if(this.content.length() >= 1) {
                  this.content = this.content.substring(0, this.content.length() - 1);
+             }
         }
 
         public void push(char character) {
@@ -583,9 +660,11 @@ class Interface {
 
                 if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     button.activate();
-                    for(Button b : this.buttons.get(context))
-                        if(b != button)
+                    for(Button b : this.buttons.get(context)) {
+                        if(b != button) {
                             b.deactivate();
+                        }
+                    }
                     this.timeLastPress = millis();
                 }
             }
@@ -604,24 +683,29 @@ class Interface {
 
                 if(field.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     field.activate();
-                    for(Button f : this.fields.get(context))
-                        if(f != field)
+                    for(Button f : this.fields.get(context)) {
+                        if(f != field) {
                             f.deactivate();
+                        }
+                    }
                     this.timeLastPress = millis();
                 }
 
-                if(field.isActive())
+                if(field.isActive()) {
                     if(keyPressed) {
                         if(!this.fieldPressed || this.fieldLastChar != key) {
-                            if(keyCode == BACKSPACE)
+                            if(keyCode == BACKSPACE) {
                                 field.pop();
-                            else if(key != CODED)
+                            } else if(key != CODED) {
                                 field.push(key);
+                            }
                             this.fieldLastChar = key;
                         }
                         this.fieldPressed = true;
-                    } else
+                    } else {
                         this.fieldPressed = false;
+                    }
+                }
             }
 
             for(Button[] buttonList : this.buttonsLists.get(context)) {
@@ -630,9 +714,11 @@ class Interface {
 
                     if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                         button.activate();
-                        for(Button e : buttonList)
-                            if(e != button)
+                        for(Button e : buttonList) {
+                            if(e != button) {
                                 e.deactivate();
+                            }
+                        }
                         this.timeLastPress = millis();
                     }
                 }
@@ -655,50 +741,65 @@ class Interface {
 
                     if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                         button.activate();
-                        for(Button[] fL : this.fieldsLists.get(context))
-                            for(Button e : fL)
-                                if(e != button)
+                        for(Button[] fL : this.fieldsLists.get(context)) {
+                            for(Button e : fL) {
+                                if(e != button) {
                                     e.deactivate();
+                                }
+                            }
+                        }
                         this.timeLastPress = millis();
                     }
 
-                    if(button.isActive())
+                    if(button.isActive()) {
                         if(keyPressed) {
                             if(!this.fieldPressed || this.fieldLastChar != key) {
-                                if(keyCode == BACKSPACE)
+                                if(keyCode == BACKSPACE) {
                                     button.pop();
-                                else if(key != CODED)
+                                } else if(key != CODED) {
                                     button.push(key);
+                                }
                                 this.fieldLastChar = key;
                             }
                             this.fieldPressed = true;
-                        } else
+                        } else {
                             this.fieldPressed = false;
+                        }
+                    }
                 }
             }
         }
 
         public void clear(int context) {
-            for(Button button : this.buttons.get(context))
+            for(Button button : this.buttons.get(context)) {
                 button.deactivate();
+            }
 
-            for(Button flag : this.flags.get(context))
+            for(Button flag : this.flags.get(context)) {
                 flag.deactivate();
+            }
 
-            for(Button field : this.fields.get(context))
+            for(Button field : this.fields.get(context)) {
                 field.deactivate();
+            }
 
-            for(Button[] buttonsList : this.buttonsLists.get(context))
-                for(Button button : buttonsList)
+            for(Button[] buttonsList : this.buttonsLists.get(context)) {
+                for(Button button : buttonsList) {
                     button.deactivate();
+                }
+            }
 
-            for(Button[] flagsList : this.flagsLists.get(context))
-                for(Button button : flagsList)
+            for(Button[] flagsList : this.flagsLists.get(context)) {
+                for(Button button : flagsList) {
                     button.deactivate();
+                }
+            }
 
-            for(Button[] fieldsList : this.fieldsLists.get(context))
-                for(Button button : fieldsList)
+            for(Button[] fieldsList : this.fieldsLists.get(context)) {
+                for(Button button : fieldsList) {
                     button.deactivate();
+                }
+            }
         }
     }
 
@@ -748,23 +849,27 @@ class Interface {
 
         public void removeKey(char content) {
             Iterator<Key> iter = this.keys.iterator();
-            while (iter.hasNext())
-                if(iter.next().getContent() == content)
+            while (iter.hasNext()) {
+                if(iter.next().getContent() == content) {
                     iter.remove();
+                }
+            }
         }
 
         public boolean isPressed(char content) {
             for(Key key : this.keys) {
-                if(key.getContent() == content)
+                if(key.getContent() == content) {
                     return key.isPressed();
+                }
             }
             return false;
         }
 
         public boolean isClicked(char content) {
             for(Key key : this.keys) {
-                if(key.getContent() == content)
+                if(key.getContent() == content) {
                     return key.isClicked();
+                }
             }
             return false;
         }
@@ -773,7 +878,7 @@ class Interface {
 
     private class Camera {
         private float posX, posY, posZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
-        private float speed, angleSpeed, ratioPitchAndYawToRoll;
+        private float speed, angleSpeed, pitchAndYawToRollRatio;
         private float zoom;
         private int mode;
 
@@ -789,7 +894,7 @@ class Interface {
             this.rightX = 1.0;
             this.rightY = this.rightZ = 0.0;
             this.angleSpeed = TWO_PI / FPS * 2E-1;
-            this.ratioPitchAndYawToRoll = 4;
+            this.pitchAndYawToRollRatio = 8.0;
             this.speed = 1E2;
             this.zoom = 1.0;
             this.mode = 0;
@@ -827,7 +932,7 @@ class Interface {
 
             if(mouseX != pmouseX || mouseY != pmouseY) {
                 if(mouseX != pmouseX) { // rotate left or right
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.ratioPitchAndYawToRoll);
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -850,7 +955,7 @@ class Interface {
                 }
 
                 if(mouseY != pmouseY) { // rotate up or down
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.ratioPitchAndYawToRoll);
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -952,13 +1057,15 @@ class Interface {
                 }
                 if(key == '-') {
                     this.zoom -= this.zoom / 1E2;
-                    if(this.zoom < 5E-1)
+                    if(this.zoom < 5E-1) {
                         this.zoom = 5E-1;
+                    }
                 }
                 if(key == '+') {
                     this.zoom += this.zoom / 1E2;
-                    if(this.zoom > 3600.0)
+                    if(this.zoom > 3600.0) {
                         this.zoom = 3600.0;
+                    }
                 }
             }
         }
@@ -1007,10 +1114,10 @@ class Interface {
             this.indexMax = this.db.getTextures().length;
             this.index = (this.index + 1) % this.indexMax;
 
-            while(true)
-                if(this.killed)
+            while(true) {
+                if(this.killed) {
                     return;
-                else if(this.work.get()) {
+                } else if(this.work.get()) {
                     this.buffer[1] = this.buffer[0].copy();
                     this.buffer[0] = this.db.getTexture(this.db.getTexturesOld()[this.index]);
                     this.buffer[0].resize(width, height);
@@ -1019,6 +1126,7 @@ class Interface {
 
                     this.work.set(false);
                 }
+            }
         }
 
         public void kill() {
@@ -1046,7 +1154,7 @@ class Interface {
 
             int wait, delayDuration;
 
-            while(true)
+            while(true) {
                 try {
                     audioInputStream = AudioSystem.getAudioInputStream(this.db.getSound(this.db.getSoundsOld()[index]));
                     this.index = (this.index + 1) % this.indexMax;
@@ -1064,6 +1172,7 @@ class Interface {
                     }
                     clip.close();
                 } catch(Exception e) {}
+            }
         }
 
         public void kill() {

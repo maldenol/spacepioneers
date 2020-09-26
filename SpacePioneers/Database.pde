@@ -40,8 +40,9 @@ class Database {
         ArrayList<String> xmlsList = new ArrayList<String>();
 
         for(String s : new File(sketchPath() + "/data/xmls/").list()) {
-            if(s.endsWith(".xml"))
+            if(s.endsWith(".xml")) {
                 xmlsList.add(s.replace(".xml", ""));
+            }
         }
 
         String[] xmlsArr = new String[xmlsList.size()];
@@ -66,10 +67,11 @@ class Database {
         ArrayList<String> texturesList = new ArrayList<String>();
 
         for(String s : new File(sketchPath() + "/data/textures/").list()) {
-            if(s.endsWith(".jpg"))
+            if(s.endsWith(".jpg")) {
                 texturesList.add(s.replace(".jpg", ""));
-            else if(s.endsWith(".png"))
+            } else if(s.endsWith(".png")) {
                 texturesList.add(s.replace(".png", ""));
+            }
         }
 
         String[] texturesArr = new String[texturesList.size()];
@@ -86,14 +88,16 @@ class Database {
         PImage result;
         try {
             result = loadImage(sketchPath() + "/data/textures/" + fileName + ".jpg");
-            if(result == null)
+            if(result == null) {
                 throw new NullPointerException();
+            }
             return result;
         } catch(Exception e) {
             try {
                 result = loadImage(sketchPath() + "/data/textures/" + fileName + ".png");
-                if(result == null)
+                if(result == null) {
                     throw new NullPointerException();
+                }
                 return result;
             } catch(Exception ee) {
                 return new PImage(1, 1, RGB);
@@ -105,8 +109,9 @@ class Database {
         ArrayList<String> soundsList = new ArrayList<String>();
 
         for(String s : new File(sketchPath() + "/data/sounds/").list()) {
-            if(s.endsWith(".wav"))
+            if(s.endsWith(".wav")) {
                 soundsList.add(s.replace(".wav", ""));
+            }
         }
 
         String[] soundsArr = new String[soundsList.size()];

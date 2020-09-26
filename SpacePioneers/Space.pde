@@ -102,8 +102,9 @@ class Space {
 
             name = parents[i].getString("name");
             texture = this.db.getTexture(name);
-            if(this.detailMode < 1)
+            if(this.detailMode < 1) {
                 texture.resize((int)(texture.width * this.detailMode), 0);
+            }
 
             Body body = new Body(posX, posY, posZ, mass, radius);
 
@@ -160,8 +161,9 @@ class Space {
             ea = ea - (ea - e * sin(ea) - ma) / (1.0 - e * cos(ea));
             diff = abs(ma - (ea - e * sin(ea)));
 
-            if(diff == 0.0)
+            if(diff == 0.0) {
                 break;
+            }
 
             if(diff > lastDiff) {
                 ea = lastEA;
@@ -194,15 +196,17 @@ class Space {
         while(iter.hasNext()) {
             Body obj1 = iter.next();
 
-            if(obj1.isDeleted())
+            if(obj1.isDeleted()) {
                 iter.remove();
-            else {
+            } else {
                 for(Body obj2 : this.bodies) {
-                    if(obj1 == obj2)
+                    if(obj1 == obj2) {
                         continue;
+                    }
 
-                    if(this.isCollide(obj1, obj2))
+                    if(this.isCollide(obj1, obj2)) {
                         this.collide(obj1, obj2);
+                    }
 
                     force = this.gForce(obj1, obj2);
                     obj1.accelerate(force.div(obj1.getMass()));
@@ -228,8 +232,9 @@ class Space {
 
         float distance = obj1.getRadius() + obj2.getRadius();
 
-        if(x * x + y * y + z * z < distance * distance)
+        if(x * x + y * y + z * z < distance * distance) {
             return true;
+        }
         return false;
     }
 
