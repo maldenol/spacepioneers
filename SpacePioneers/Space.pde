@@ -30,7 +30,7 @@ import java.util.Iterator;
 class Space {
     private float gConst, detailMode, valuesKoefficient;
     private ArrayList<Body> bodies;
-    private PImage skybox;
+    private PImage skybox, telescope;
     private Database db;
 
 
@@ -52,6 +52,8 @@ class Space {
         this.detailMode = database.getFloat("detailMode");
         this.skybox = this.db.getTexture(database.getString("skybox"));
         this.skybox.resize((int)(this.skybox.width * this.detailMode), 0);
+        this.telescope = this.db.getTexture(database.getString("telescope"));
+        this.telescope.resize((int)(this.telescope.width * this.detailMode), 0);
         this.valuesKoefficient = database.getFloat("valuesKoefficient");
 
         parents = database.getChildren("body");
@@ -61,8 +63,8 @@ class Space {
     }
 
     private void generateSpace(XML[] parents) {
-        float posX, posY, posZ, velX, velY, velZ, angPosX, angPosY, angPosZ, angPeriod, mass, radius;
-        float orbitMass, orbitPosX, orbitPosY, orbitPosZ, orbitVelX, orbitVelY, orbitVelZ;
+        float positionX, positionY, positionZ, velocityX, velocityY, velocityZ, angPositionX, angPositionY, angPositionZ, angPeriod, mass, radius;
+        float orbitMass, orbitPositionX, orbitPositionY, orbitPositionZ, orbitVelocityX, orbitVelocityY, orbitVelocityZ;
         float semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly;
         String name;
         PImage texture;
@@ -71,27 +73,27 @@ class Space {
         float[][] result;
 
         for(int i = 0; i < parents.length; i++) {
-            posX = parents[i].getFloat("posX") * this.valuesKoefficient;
-            posY = parents[i].getFloat("posY") * this.valuesKoefficient;
-            posZ = parents[i].getFloat("posZ") * this.valuesKoefficient;
-            velX = parents[i].getFloat("velX") * this.valuesKoefficient;
-            velY = parents[i].getFloat("velY") * this.valuesKoefficient;
-            velZ = parents[i].getFloat("velZ") * this.valuesKoefficient;
-            angPosX = radians(new Float(parents[i].getFloat("angPosX")));
-            angPosY = radians(parents[i].getFloat("angPosY"));
-            angPosZ = radians(parents[i].getFloat("angPosZ"));
+            positionX = parents[i].getFloat("positionX") * this.valuesKoefficient;
+            positionY = parents[i].getFloat("positionY") * this.valuesKoefficient;
+            positionZ = parents[i].getFloat("positionZ") * this.valuesKoefficient;
+            velocityX = parents[i].getFloat("velocityX") * this.valuesKoefficient;
+            velocityY = parents[i].getFloat("velocityY") * this.valuesKoefficient;
+            velocityZ = parents[i].getFloat("velocityZ") * this.valuesKoefficient;
+            angPositionX = radians(new Float(parents[i].getFloat("angPositionX")));
+            angPositionY = radians(parents[i].getFloat("angPositionY"));
+            angPositionZ = radians(parents[i].getFloat("angPositionZ"));
             angPeriod = parents[i].getFloat("angPeriod");
             mass = parents[i].getFloat("mass") * this.valuesKoefficient * this.valuesKoefficient;
             radius = parents[i].getFloat("radius") * this.valuesKoefficient;
 
             parent = parents[i].getParent();
             orbitMass = parent.getFloat("mass");
-            orbitPosX = parent.getFloat("posX");
-            orbitPosY = parent.getFloat("posY");
-            orbitPosZ = parent.getFloat("posZ");
-            orbitVelX = parent.getFloat("velX");
-            orbitVelY = parent.getFloat("velY");
-            orbitVelZ = parent.getFloat("velZ");
+            orbitPositionX = parent.getFloat("positionX");
+            orbitPositionY = parent.getFloat("positionY");
+            orbitPositionZ = parent.getFloat("positionZ");
+            orbitVelocityX = parent.getFloat("velocityX");
+            orbitVelocityY = parent.getFloat("velocityY");
+            orbitVelocityZ = parent.getFloat("velocityZ");
 
             semiMajorAxis = parents[i].getFloat("semiMajorAxis") * this.valuesKoefficient;
             eccentricity = parents[i].getFloat("eccentricity");
@@ -106,42 +108,42 @@ class Space {
                 texture.resize((int)(texture.width * this.detailMode), 0);
             }
 
-            Body body = new Body(posX, posY, posZ, mass, radius);
+            Body body = new Body(positionX, positionY, positionZ, mass, radius);
 
-            body.setVel(velX, velY, velZ);
+            body.setVelocity(velocityX, velocityY, velocityZ);
 
-            body.setAnglePos(angPosX, angPosY, angPosZ);
+            body.setAnglePosition(angPositionX, angPositionY, angPositionZ);
             body.setAnglePeriod(angPeriod);
             body.setTexture(texture);
 
             if(orbitMass != 0.0) {
                 result = convertKeplerianToCartesian(semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
-                posX = result[0][0];
-                posY = result[0][1];
-                posZ = result[0][2];
-                velX = result[1][0];
-                velY = result[1][1];
-                velZ = result[1][2];
+                positionX = result[0][0];
+                positionY = result[0][1];
+                positionZ = result[0][2];
+                velocityX = result[1][0];
+                velocityY = result[1][1];
+                velocityZ = result[1][2];
 
-                posX += orbitPosX;
-                posY += orbitPosY;
-                posZ += orbitPosZ;
+                positionX += orbitPositionX;
+                positionY += orbitPositionY;
+                positionZ += orbitPositionZ;
 
-                body.setPos(posX, posY, posZ);
+                body.setPosition(positionX, positionY, positionZ);
 
-                parents[i].setFloat("posX", posX);
-                parents[i].setFloat("posY", posY);
-                parents[i].setFloat("posZ", posZ);
+                parents[i].setFloat("positionX", positionX);
+                parents[i].setFloat("positionY", positionY);
+                parents[i].setFloat("positionZ", positionZ);
 
-                velX += orbitVelX;
-                velY += orbitVelY;
-                velZ += orbitVelZ;
+                velocityX += orbitVelocityX;
+                velocityY += orbitVelocityY;
+                velocityZ += orbitVelocityZ;
 
-                body.setVel(velX, velY, velZ);
+                body.setVelocity(velocityX, velocityY, velocityZ);
 
-                parents[i].setFloat("velX", velX);
-                parents[i].setFloat("velY", velY);
-                parents[i].setFloat("velZ", velZ);
+                parents[i].setFloat("velocityX", velocityX);
+                parents[i].setFloat("velocityY", velocityY);
+                parents[i].setFloat("velocityZ", velocityZ);
             }
 
             this.bodies.add(body);
@@ -151,7 +153,7 @@ class Space {
     }
 
     public float[][] convertKeplerianToCartesian(float sma, float e, float ap, float lan, float i, float ma, float orbitMass) {
-        float ea, ta, distance, prePosX, prePosY, preVelX, preVelY, posX, posY, posZ, velX, velY, velZ;
+        float ea, ta, distance, prePositionX, prePositionY, preVelocityX, preVelocityY, positionX, positionY, positionZ, velocityX, velocityY, velocityZ;
         ea = ma;
 
         float diff = abs(ma - (ea - e * sin(ea))), lastDiff, lastEA;
@@ -175,19 +177,19 @@ class Space {
 
         distance = sma * (1.0 - e * cos(ea));
 
-        prePosX = distance * cos(ta);
-        prePosY = distance * sin(ta);
-        preVelX = sqrt(this.gConst * sma * orbitMass) / distance * -sin(ea);
-        preVelY = sqrt(this.gConst * sma * orbitMass) / distance * sqrt(1.0 - e * e) * cos(ea);
+        prePositionX = distance * cos(ta);
+        prePositionY = distance * sin(ta);
+        preVelocityX = sqrt(this.gConst * sma * orbitMass) / distance * -sin(ea);
+        preVelocityY = sqrt(this.gConst * sma * orbitMass) / distance * sqrt(1.0 - e * e) * cos(ea);
 
-        posX = prePosX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - prePosY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
-        posY = prePosX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - prePosY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
-        posZ = prePosX * (sin(ap) * sin(i)) + prePosY * (cos(ap) * sin(i));
-        velX = preVelX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - preVelY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
-        velY = preVelX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - preVelY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
-        velZ = preVelX * (sin(ap) * sin(i)) + preVelY * (cos(ap) * sin(i));
+        positionX = prePositionX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - prePositionY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
+        positionY = prePositionX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - prePositionY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
+        positionZ = prePositionX * (sin(ap) * sin(i)) + prePositionY * (cos(ap) * sin(i));
+        velocityX = preVelocityX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - preVelocityY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
+        velocityY = preVelocityX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - preVelocityY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
+        velocityZ = preVelocityX * (sin(ap) * sin(i)) + preVelocityY * (cos(ap) * sin(i));
 
-        return new float[][]{{posX, posY, posZ}, {velX, velY, velZ}};
+        return new float[][]{{positionX, positionY, positionZ}, {velocityX, velocityY, velocityZ}};
     }
 
     public void tick() {
@@ -223,12 +225,12 @@ class Space {
     }
 
     public boolean isCollide(Body obj1, Body obj2) {
-        PVector pos1 = obj1.getPos();
-        PVector pos2 = obj2.getPos();
+        PVector position1 = obj1.getPosition();
+        PVector position2 = obj2.getPosition();
 
-        float x = pos1.x - pos2.x;
-        float y = pos1.y - pos2.y;
-        float z = pos1.z - pos2.z;
+        float x = position1.x - position2.x;
+        float y = position1.y - position2.y;
+        float z = position1.z - position2.z;
 
         float distance = obj1.getRadius() + obj2.getRadius();
 
@@ -242,22 +244,22 @@ class Space {
         PVector vector = new PVector(0, 0, 0);
         float mass1 = obj1.getMass();
         float mass2 = obj2.getMass();
-        PVector vel1 = obj1.getVel().mult(mass1);
-        PVector vel2 = obj2.getVel().mult(mass2);
+        PVector velocity1 = obj1.getVelocity().mult(mass1);
+        PVector velocity2 = obj2.getVelocity().mult(mass2);
 
         float volume = (pow(obj1.getRadius(), 3) + pow(obj2.getRadius(), 3)) * 4.0 / 3.0 * PI;
         float radius = pow(volume * 3.0 / 4.0 / PI, 1.0 / 3.0);
 
-        vector.add(vel1);
-        vector.add(vel2);
+        vector.add(velocity1);
+        vector.add(velocity2);
         vector.div(mass1 + mass2);
 
         if(mass1 >= mass2) {
-            obj1.setVel(vector);
+            obj1.setVelocity(vector);
             obj1.setRadius(radius);
             obj2.delete();
         } else {
-            obj2.setVel(vector);
+            obj2.setVelocity(vector);
             obj2.setRadius(radius);
             obj1.delete();
         }
@@ -266,11 +268,11 @@ class Space {
     private PVector gForce(Body obj1, Body obj2) {
         float mass1 = obj1.getMass();
         float mass2 = obj2.getMass();
-        PVector pos1 = obj1.getPos();
-        PVector pos2 = obj2.getPos();
+        PVector position1 = obj1.getPosition();
+        PVector position2 = obj2.getPosition();
 
-        float squaredDistance = pow(pos1.x - pos2.x, 2) + pow(pos1.y - pos2.y, 2) + pow(pos1.z - pos2.z, 2);
-        PVector force = new PVector(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z);
+        float squaredDistance = pow(position1.x - position2.x, 2) + pow(position1.y - position2.y, 2) + pow(position1.z - position2.z, 2);
+        PVector force = new PVector(position2.x - position1.x, position2.y - position1.y, position2.z - position1.z);
         float scalar = mass1 * mass2 / squaredDistance * this.gConst;
 
         force.normalize();
@@ -280,17 +282,17 @@ class Space {
     }
 
     public void draw() {
-        PVector pos;
+        PVector position;
         float[] angle;
         PShape pshape;
 
         noStroke();
         fill(255);
         for(Body item : this.bodies) {
-            pos = item.getPos();
-            angle = item.getAnglePos();
+            position = item.getPosition();
+            angle = item.getAnglePosition();
 
-            translate(pos.x, pos.y, pos.z);
+            translate(position.x, position.y, position.z);
 
             pshape = createShape(SPHERE, item.getRadius());
             pshape.setTexture(item.getTexture());
@@ -299,7 +301,7 @@ class Space {
             pshape.rotateY(angle[2]);
             shape(pshape, 0, 0);
 
-            translate(-pos.x, -pos.y, -pos.z);
+            translate(-position.x, -position.y, -position.z);
         }
     }
 
@@ -307,55 +309,55 @@ class Space {
         return this.skybox.copy();
     }
 
+    public PImage getTelescope() {
+        return this.telescope.copy();
+    }
 
-    class Body {
-        private PVector pos, vel;
+
+    public class Body {
+        private PVector position, velocity;
         private float mass;
         private float radius;
-        private float anglePosX, anglePosY, anglePosZ, angleVelY;
+        private float anglePositionX, anglePositionY, anglePositionZ, angleVelocityY;
         private PImage texture;
         private boolean deleted;
 
 
-        public Body(PVector pos, float mass, float radius) {
-            this.pos = pos.copy();
-            this.vel = new PVector(0, 0, 0);
+        public Body(float positionX, float positionY, float positionZ, float mass, float radius) {
+            this.position = new PVector(positionX, positionY, positionZ);
+            this.velocity = new PVector(0, 0, 0);
             this.mass = mass;
             this.radius = radius;
-            this.anglePosX = 0;
-            this.anglePosY = 0;
-            this.angleVelY = 0;
+            this.anglePositionX = 0;
+            this.anglePositionY = 0;
+            this.angleVelocityY = 0;
             this.deleted = false;
             this.texture = get();
         }
 
-        public Body(float posX, float posY, float posZ, float mass, float radius) {
-            this(new PVector(posX, posY, posZ), mass, radius);
+
+        public void setPosition(PVector position) {
+            this.position = position.copy();
         }
 
-
-        public void setPos(PVector pos) {
-            this.pos = pos.copy();
+        public void setPosition(float positionX, float positionY, float positionZ) {
+            this.position = new PVector(positionX, positionY, positionZ);
         }
 
-        public void setPos(float posX, float posY, float posZ) {
-            this.pos = new PVector(posX, posY, posZ);
+        public PVector getPosition() {
+            return this.position.copy();
         }
 
-        public PVector getPos() {
-            return this.pos.copy();
+        public void setVelocity(PVector velocity) {
+            this.velocity = velocity.copy();
         }
 
-        public void setVel(PVector vel) {
-            this.vel = vel.copy();
+        public void setVelocity(float velocityX, float velocityY, float velocityZ) {
+            this.velocity = new PVector(velocityX, velocityY, velocityZ);
         }
 
-        public void setVel(float velX, float velY, float velZ) {
-            this.vel = new PVector(velX, velY, velZ);
-        }
-
-        public PVector getVel() {
-            return this.vel.copy();
+        public PVector getVelocity() {
+            return this.velocity.copy();
         }
 
         public void setMass(float mass) {
@@ -374,26 +376,26 @@ class Space {
             return this.radius;
         }
 
-        public void setAnglePos(float anglePosX, float anglePosY, float anglePosZ) {
-            this.anglePosX = anglePosX;
-            this.anglePosY = anglePosY;
-            this.anglePosZ = anglePosZ;
+        public void setAnglePosition(float anglePositionX, float anglePositionY, float anglePositionZ) {
+            this.anglePositionX = anglePositionX;
+            this.anglePositionY = anglePositionY;
+            this.anglePositionZ = anglePositionZ;
         }
 
-        public void setAnglePos(float anglePosX, float anglePosZ) {
-            this.setAnglePos(anglePosX, 0, anglePosZ);
+        public void setAnglePosition(float anglePositionX, float anglePositionZ) {
+            this.setAnglePosition(anglePositionX, 0, anglePositionZ);
         }
 
-        public float[] getAnglePos() {
-            return new float[]{this.anglePosX, this.anglePosY, this.anglePosZ};
+        public float[] getAnglePosition() {
+            return new float[]{this.anglePositionX, this.anglePositionY, this.anglePositionZ};
         }
 
         public void setAnglePeriod(float anglePeriod) {
-            this.angleVelY = TWO_PI / anglePeriod;
+            this.angleVelocityY = TWO_PI / anglePeriod;
         }
 
         public float getAnglePeriod() {
-            return TWO_PI / this.angleVelY;
+            return TWO_PI / this.angleVelocityY;
         }
 
         public void setTexture(PImage texture) {
@@ -404,17 +406,17 @@ class Space {
             return this.texture.copy();
         }
 
-        public void accelerate(PVector vel) {
-            this.vel.add(vel);
+        public void accelerate(PVector velocity) {
+            this.velocity.add(velocity);
         }
 
-        public void accelerateAng(float angleVel) {
-            this.angleVelY += angleVel;
+        public void accelerateAng(float angleVelocity) {
+            this.angleVelocityY += angleVelocity;
         }
 
         public void tick() {
-            this.pos.add(this.vel);
-            this.anglePosY = (this.anglePosY + this.angleVelY) % TWO_PI;
+            this.position.add(this.velocity);
+            this.anglePositionY = (this.anglePositionY + this.angleVelocityY) % TWO_PI;
         }
 
         public void delete() {

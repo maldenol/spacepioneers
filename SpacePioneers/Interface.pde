@@ -18,11 +18,12 @@
 /***
   "Space Pioneers"
   Interface class
-      Camera class
       Button class
       ButtonServer class
       Key class
       KeyServer class
+      Camera class
+      Telescope class
       TextureLoaderThread class that extends Thread
       SoundtrackThread class that extends Thread
   Malovanyi Denys Olehovych
@@ -74,6 +75,8 @@ class Interface {
     private Camera camera;
 
     private PShape skybox;
+
+    private Telescope telescope;
 
 
     public Interface() {
@@ -346,6 +349,12 @@ class Interface {
                     this.skybox.setTexture(this.space.getSkybox());
                     this.skybox.rotateY(HALF_PI);
                     this.pause = false;
+
+                    this.telescope = new Telescope(0.0, 0.0, 0.0, 10.0, 10.0, this.space);
+                    this.telescope.getBody().setVelocity(110, 0, 0);
+                    this.telescope.getBody().setTexture(this.space.getTelescope());
+                    this.space.addBody(this.telescope.getBody());
+                    this.camera.setBody(this.telescope.getBody());
 
                     this.textureLoader.kill();
                     this.textureLoader = null;
@@ -877,16 +886,20 @@ class Interface {
 
 
     private class Camera {
-        private float posX, posY, posZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
+        private float positionX, positionY, positionZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
         private float speed, angleSpeed, pitchAndYawToRollRatio;
         private float zoom;
-        private int mode;
+        private final float zoomInit, zoomMin, zoomMax, zoomDiffDiv;
+        private boolean dof5or6, bodyView;
+        private Space.Body body;
+        private float bodyViewDistance;
+        private final float bodyViewDistanceInit, bodyViewDistanceMin, bodyViewDistanceMax, bodyViewDistanceDiffDiv;
 
         private Robot mouse;
 
 
         public Camera() {
-            this.posX = this.posY = this.posZ = 0.0;
+            this.positionX = this.positionY = this.positionZ = 0.0;
             this.forwardX = this.forwardY = 0.0;
             this.forwardZ = 1.0;
             this.upX = this.upZ = 0.0;
@@ -897,7 +910,17 @@ class Interface {
             this.pitchAndYawToRollRatio = 8.0;
             this.speed = 1E2;
             this.zoom = 1.0;
-            this.mode = 0;
+            this.zoomInit = this.zoom;
+            this.zoomMin = 5E-1;
+            this.zoomMax = 36E2;
+            this.zoomDiffDiv = 1E2;
+            this.dof5or6 = true;
+            this.bodyView = false;
+            this.bodyViewDistance = 10;
+            this.bodyViewDistanceInit = this.bodyViewDistance;
+            this.bodyViewDistanceMin = 1E0;
+            this.bodyViewDistanceMax = 1E3;
+            this.bodyViewDistanceDiffDiv = 1E1;
 
             try {
                 this.mouse = new Robot();
@@ -907,7 +930,13 @@ class Interface {
 
         public void begin() {
             beginCamera();
-            camera(this.posX, this.posY, this.posZ, this.forwardX + this.posX, this.forwardY + this.posY, this.forwardZ + this.posZ, this.upX, this.upY, this.upZ);
+            if(this.bodyView == false) {
+                camera(this.positionX, this.positionY, this.positionZ, this.positionX + this.forwardX, this.positionY + this.forwardY, this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
+            } else {
+                PVector bodyPosition = this.body.getPosition();
+                float r = this.body.getRadius() * this.bodyViewDistance;
+                camera(bodyPosition.x - r * this.forwardX, bodyPosition.y - r * this.forwardY, bodyPosition.z - r * this.forwardZ, bodyPosition.x, bodyPosition.y, bodyPosition.z, this.upX, this.upY, this.upZ);
+            }
 
             float fov = PI / 3.0 / zoom;
             float cameraZ = (height / 2.0) / tan(fov / 2.0);
@@ -917,9 +946,17 @@ class Interface {
         public void begin(PShape skybox) {
             this.begin();
 
-            translate(this.posX, this.posY, this.posZ);
-            shape(skybox, 0, 0);
-            translate(-this.posX, -this.posY, -this.posZ);
+            if(this.bodyView == false) {
+                translate(this.positionX, this.positionY, this.positionZ);
+                shape(skybox, 0, 0);
+                translate(-this.positionX, -this.positionY, -this.positionZ);
+            } else {
+                PVector bodyPosition = this.body.getPosition();
+                float r = this.body.getRadius() * this.bodyViewDistance;
+                translate(bodyPosition.x - r * this.forwardX, bodyPosition.y - r * this.forwardY, bodyPosition.z - r * this.forwardZ);
+                shape(skybox, 0, 0);
+                translate(-(bodyPosition.x - r * this.forwardX), -(bodyPosition.y - r * this.forwardY), -(bodyPosition.z - r * this.forwardZ));
+            }
         }
 
         public void end() {
@@ -930,7 +967,7 @@ class Interface {
             float[] quaternion;
             PVector vector;
 
-            if(mouseX != pmouseX || mouseY != pmouseY) {
+            if(this.dof5or6 == true) { // 6 degrees of freedom
                 if(mouseX != pmouseX) { // rotate left or right
                     quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
@@ -953,7 +990,6 @@ class Interface {
                     this.forwardY = vector.y;
                     this.forwardZ = vector.z;
                 }
-
                 if(mouseY != pmouseY) { // rotate up or down
                     quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
@@ -976,40 +1012,57 @@ class Interface {
                     this.forwardY = vector.y;
                     this.forwardZ = vector.z;
                 }
-
-                this.mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
+            } else { // 5 degrees of freedom
+                if(mouseX != pmouseX) { // rotate left or right
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                    vector.normalize();
+                    this.forwardX = vector.x;
+                    this.forwardY = vector.y;
+                    this.forwardZ = vector.z;
+                }
+                if(mouseY != pmouseY) { // rotate up or down
+                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                    vector.normalize();
+                    this.forwardX = vector.x;
+                    this.forwardY = vector.y;
+                    this.forwardZ = vector.z;
+                }
             }
+
+            this.mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
 
             if(keyPressed) {
                 if(key == 'w') { // move forward
-                    this.posX += this.forwardX * this.speed;
-                    this.posY += this.forwardY * this.speed;
-                    this.posZ += this.forwardZ * this.speed;
+                    this.positionX += this.forwardX * this.speed;
+                    this.positionY += this.forwardY * this.speed;
+                    this.positionZ += this.forwardZ * this.speed;
                 }
                 if(key == 's') { // move backward
-                    this.posX -= this.forwardX * this.speed;
-                    this.posY -= this.forwardY * this.speed;
-                    this.posZ -= this.forwardZ * this.speed;
+                    this.positionX -= this.forwardX * this.speed;
+                    this.positionY -= this.forwardY * this.speed;
+                    this.positionZ -= this.forwardZ * this.speed;
                 }
                 if(key == 'd') { // move right
-                    this.posX += -this.rightX * this.speed;
-                    this.posY += -this.rightY * this.speed;
-                    this.posZ += -this.rightZ * this.speed;
+                    this.positionX += -this.rightX * this.speed;
+                    this.positionY += -this.rightY * this.speed;
+                    this.positionZ += -this.rightZ * this.speed;
                 }
                 if(key == 'a') { // move left
-                    this.posX -= -this.rightX * this.speed;
-                    this.posY -= -this.rightY * this.speed;
-                    this.posZ -= -this.rightZ * this.speed;
+                    this.positionX -= -this.rightX * this.speed;
+                    this.positionY -= -this.rightY * this.speed;
+                    this.positionZ -= -this.rightZ * this.speed;
                 }
                 if(key == ' ') { // move up
-                    this.posX -= this.upX * this.speed;
-                    this.posY -= this.upY * this.speed;
-                    this.posZ -= this.upZ * this.speed;
+                    this.positionX -= this.upX * this.speed;
+                    this.positionY -= this.upY * this.speed;
+                    this.positionZ -= this.upZ * this.speed;
                 }
                 if(keyCode == SHIFT) { // move down
-                    this.posX += this.upX * this.speed;
-                    this.posY += this.upY * this.speed;
-                    this.posZ += this.upZ * this.speed;
+                    this.positionX += this.upX * this.speed;
+                    this.positionY += this.upY * this.speed;
+                    this.positionZ += this.upZ * this.speed;
                 }
                 if(key == 'q') { // spin left
                     quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
@@ -1055,19 +1108,53 @@ class Interface {
                     this.upY = vector.y;
                     this.upZ = vector.z;
                 }
-                if(key == '-') {
-                    this.zoom -= this.zoom / 1E2;
-                    if(this.zoom < 5E-1) {
-                        this.zoom = 5E-1;
+                if(key == '1') {
+                    this.zoom -= this.zoom / this.zoomDiffDiv;
+                    if(this.zoom < this.zoomMin) {
+                        this.zoom = this.zoomMin;
                     }
+                }
+                if(key == '2') {
+                    this.zoom = this.zoomInit;
+                }
+                if(key == '3') {
+                    this.zoom += this.zoom / this.zoomDiffDiv;
+                    if(this.zoom > this.zoomMax) {
+                        this.zoom = this.zoomMax;
+                    }
+                }
+                if(key == '4' && this.bodyView == true) {
+                    this.bodyViewDistance -= this.bodyViewDistance / this.bodyViewDistanceDiffDiv;
+                    if(this.bodyViewDistance < this.bodyViewDistanceMin) {
+                        this.bodyViewDistance = this.bodyViewDistanceMin;
+                    }
+                }
+                if(key == '5' && this.bodyView == true) {
+                    this.bodyViewDistance = this.bodyViewDistanceInit;
+                }
+                if(key == '6' && this.bodyView == true) {
+                    this.bodyViewDistance += this.bodyViewDistance / this.bodyViewDistanceDiffDiv;
+                    if(this.bodyViewDistance > this.bodyViewDistanceMax) {
+                        this.bodyViewDistance = this.bodyViewDistanceMax;
+                    }
+                }
+                if(key == '-') {
+                    this.dof5or6 = false;
                 }
                 if(key == '+') {
-                    this.zoom += this.zoom / 1E2;
-                    if(this.zoom > 3600.0) {
-                        this.zoom = 3600.0;
-                    }
+                    this.dof5or6 = true;
+                }
+                if(key == '/') {
+                    this.bodyView = false;
+                }
+                if(key == '*') {
+                    this.bodyView = true;
                 }
             }
+        }
+
+        public void setBody(Space.Body body) {
+            this.body = body;
         }
 
         public float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
@@ -1092,6 +1179,17 @@ class Interface {
         }
     }
 
+    private class Telescope {
+        private Space.Body body;
+
+        public Telescope(float x, float y, float z, float mass, float radius, Space space) {
+            this.body = space.new Body(x, y, z, mass, radius);
+        }
+
+        public Space.Body getBody() {
+            return this.body;
+        }
+    }
 
     public class TextureLoaderThread extends Thread {
         private Database db;
