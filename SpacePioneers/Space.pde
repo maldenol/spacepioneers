@@ -30,7 +30,9 @@ import java.util.Iterator;
 class Space {
     private float gConst, detailMode, valuesKoefficient;
     private ArrayList<Body> bodies;
-    private PImage skybox, telescope;
+    private PImage skybox;
+    private Body telescope;
+
     private Database db;
 
 
@@ -52,8 +54,6 @@ class Space {
         this.detailMode = database.getFloat("detailMode");
         this.skybox = this.db.getTexture(database.getString("skybox"));
         this.skybox.resize((int)(this.skybox.width * this.detailMode), 0);
-        this.telescope = this.db.getTexture(database.getString("telescope"));
-        this.telescope.resize((int)(this.telescope.width * this.detailMode), 0);
         this.valuesKoefficient = database.getFloat("valuesKoefficient");
 
         parents = database.getChildren("body");
@@ -147,6 +147,10 @@ class Space {
             }
 
             this.bodies.add(body);
+
+            if(name.equals("telescope")) {
+                this.telescope = body;
+            }
 
             generateSpace(parents[i].getChildren("body"));
         }
@@ -309,8 +313,8 @@ class Space {
         return this.skybox.copy();
     }
 
-    public PImage getTelescope() {
-        return this.telescope.copy();
+    public Body getTelescope() {
+        return this.telescope;
     }
 
 

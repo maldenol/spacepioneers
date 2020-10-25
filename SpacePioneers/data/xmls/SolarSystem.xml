@@ -22,6 +22,8 @@
 			</body>
 			<body name="pluto" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="-6.163" angPosY="0" angPosZ="0" angPeriod="5.51856672E5" mass="1.303E22" radius="1.1883E6" semiMajorAxis="5.90638E12" eccentricity="0.2488273" argumentOfPeriapsis="113.76329" longitudeOfAscendingNode="110.30347" inclination="0" meanAnomaly="0">
 			</body>
+			<body name="telescope" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="0" angPosY="0" angPosZ="0" angPeriod="1" mass="1.303E22" radius="1.1883E6" semiMajorAxis="1E7" eccentricity="0.2" argumentOfPeriapsis="115" longitudeOfAscendingNode="115" inclination="0" meanAnomaly="0">
+			</body>
 		</body>
 	</body>
 </space>

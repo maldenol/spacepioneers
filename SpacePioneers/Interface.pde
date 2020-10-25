@@ -18,10 +18,10 @@
 /***
   "Space Pioneers"
   Interface class
-      Button class
       ButtonServer class
-      Key class
+          Button class
       KeyServer class
+          Key class
       Camera class
       Telescope class
       TextureLoaderThread class that extends Thread
@@ -47,20 +47,17 @@ class Interface {
 
     private int context;
 
-    private Button buttonMenuBack;
-    private Button buttonMenuCredits, buttonMenuSettings, buttonMenuPlay;
-    private Button buttonPlayMenu, buttonPlayResume, buttonPlaySettings, buttonPlayExit;
-    private Button buttonEditorMenu, buttonEditorResume, buttonEditorSettings, buttonEditorExit, buttonEditorSave;
-    private Button buttonMenuSingleplayer, buttonMenuMultiplayer, buttonMenuEditor;
-    private Button buttonMenuHost, buttonMenuConnect;
-    private Button fieldMenuIP, fieldMenuPort;
-    private Button[] buttonsMenuWorlds, buttonsEditorBodies;
-
-    private boolean pause;
-    private float speed;
-
     private ButtonServer buttonServer;
     private KeyServer keyServer;
+
+    private ButtonServer.Button buttonMenuBack;
+    private ButtonServer.Button buttonMenuCredits, buttonMenuSettings, buttonMenuPlay;
+    private ButtonServer.Button buttonPlayMenu, buttonPlayResume, buttonPlaySettings, buttonPlayExit;
+    private ButtonServer.Button buttonEditorMenu, buttonEditorResume, buttonEditorSettings, buttonEditorExit, buttonEditorSave;
+    private ButtonServer.Button buttonMenuSingleplayer, buttonMenuMultiplayer, buttonMenuEditor;
+    private ButtonServer.Button buttonMenuHost, buttonMenuConnect;
+    private ButtonServer.Button fieldMenuIP, fieldMenuPort;
+    private ButtonServer.Button[] buttonsMenuWorlds, buttonsEditorBodies;
 
     private PImage[] buffer;
     private int xo, yo, swap;
@@ -71,10 +68,14 @@ class Interface {
 
     private String creditsContent;
 
+    private boolean pause;
+    private float speed;
+
     private Space space;
-    private Camera camera;
 
     private PShape skybox;
+
+    private Camera camera;
 
     private Telescope telescope;
 
@@ -87,59 +88,85 @@ class Interface {
         this.pause = false;
         this.speed = 1.0;
 
+        this.buttonServer = new ButtonServer();
         float w, h, x, y0;
         w = width;
         h = height / 16.0;
         x = h / 10.0;
         y0 = h / 10.0;
-        this.buttonMenuBack = new Button(x, y0, w - 2.0 * x, h, "BACK");
+        this.buttonMenuBack = this.buttonServer.newButton(x, y0, w - 2.0 * x, h, "BACK");
         w = width / 4.0;
         h = height / 4.0;
-        this.buttonPlayMenu = new Button(w, h, width - w * 2.0, height - h * 2.0, h / 16.0, h / 4.0, "");
+        this.buttonPlayMenu = this.buttonServer.newButton(w, h, width - w * 2.0, height - h * 2.0, h / 16.0, h / 4.0, "");
         w = width / 8.0;
         h = height / 16.0;
         x = (width - w) / 2.0;
-        this.buttonMenuPlay = new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
-        this.buttonMenuSettings = new Button(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
-        this.buttonMenuCredits = new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
-        this.buttonPlayResume = new Button(x + 1, height / 5.0 * 2.5 - h * 2.0 + 1, w, h, "RESUME");
-        this.buttonPlaySettings = new Button(x + 1, height / 5.0 * 3.0 - h * 2.0 + 1, w, h, "SETTINGS");
-        this.buttonPlayExit = new Button(x + 1, height / 5.0 * 3.5 - h * 2.0 + 1, w, h, "EXIT");
+        this.buttonMenuPlay = this.buttonServer.newButton(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
+        this.buttonMenuSettings = this.buttonServer.newButton(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
+        this.buttonMenuCredits = this.buttonServer.newButton(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
+        this.buttonPlayResume = this.buttonServer.newButton(x + 1, height / 5.0 * 2.5 - h * 2.0 + 1, w, h, "RESUME");
+        this.buttonPlaySettings = this.buttonServer.newButton(x + 1, height / 5.0 * 3.0 - h * 2.0 + 1, w, h, "SETTINGS");
+        this.buttonPlayExit = this.buttonServer.newButton(x + 1, height / 5.0 * 3.5 - h * 2.0 + 1, w, h, "EXIT");
         w = width / 3.0;
-        this.buttonEditorMenu = new Button(width - w, -5.0, width, height + 5.0, 5.0, 0.0, "");
+        this.buttonEditorMenu = this.buttonServer.newButton(width - w, -5.0, width, height + 5.0, 5.0, 0.0, "");
         w = width / 8.0;
         h = height / 4.0;
         x = 0;
-        this.buttonEditorSave = new Button(x, h * 0.0, w, h, 2.0, 5.0, "SAVE");
-        this.buttonEditorResume = new Button(x, h * 1.0, w, h, 2.0, 5.0, "RESUME");
-        this.buttonEditorSettings = new Button(x, h * 2.0, w, h, 2.0, 5.0, "SETTINGS");
-        this.buttonEditorExit = new Button(x, h * 3.0, w, h, 2.0, 5.0, "EXIT");
+        this.buttonEditorSave = this.buttonServer.newButton(x, h * 0.0, w, h, 2.0, 5.0, "SAVE");
+        this.buttonEditorResume = this.buttonServer.newButton(x, h * 1.0, w, h, 2.0, 5.0, "RESUME");
+        this.buttonEditorSettings = this.buttonServer.newButton(x, h * 2.0, w, h, 2.0, 5.0, "SETTINGS");
+        this.buttonEditorExit = this.buttonServer.newButton(x, h * 3.0, w, h, 2.0, 5.0, "EXIT");
         w = width / 8.0;
         h = height / 8.0;
         x = width - w;
-        this.buttonMenuSingleplayer = new Button(x - h / 10.0, height / 5.0 * 2.0 - h * 3.0 / 2.0, w, h, "SINGLEPLAYER");
-        this.buttonMenuMultiplayer = new Button(x - h / 10.0, height / 5.0 * 3.0 - h * 3.0 / 2.0, w, h, "MULTIPLAYER");
-        this.buttonMenuEditor = new Button(x - h / 10.0, height / 5.0 * 4.0 - h * 3.0 / 2.0, w, h, "EDITOR");
+        this.buttonMenuSingleplayer = this.buttonServer.newButton(x - h / 10.0, height / 5.0 * 2.0 - h * 3.0 / 2.0, w, h, "SINGLEPLAYER");
+        this.buttonMenuMultiplayer = this.buttonServer.newButton(x - h / 10.0, height / 5.0 * 3.0 - h * 3.0 / 2.0, w, h, "MULTIPLAYER");
+        this.buttonMenuEditor = this.buttonServer.newButton(x - h / 10.0, height / 5.0 * 4.0 - h * 3.0 / 2.0, w, h, "EDITOR");
         w = width / 4.0;
         h = height / 16.0;
         x = (width - w) / 2.0;
         y0 = height / 2.0 - h * 2.0;
-        this.fieldMenuIP = new Button(x, y0 + h * 0.0, w, h, "0.0.0.0");
-        this.fieldMenuPort = new Button(x, y0 + h * 1.0, w, h, "16384");
-        this.buttonMenuHost = new Button(x, y0 + h * 2.0, w, h, "HOST");
-        this.buttonMenuConnect = new Button(x, y0 + h * 3.0, w, h, "CONNECT");
-
-        this.buttonServer = new ButtonServer();
-        this.buttonServer.addContext(new Button[]{this.buttonMenuPlay, this.buttonMenuSettings, this.buttonMenuCredits}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // main menu
-        this.buttonServer.addContext(new Button[]{this.buttonMenuBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // credits
-        this.buttonServer.addContext(new Button[]{this.buttonMenuBack}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // settings
-        this.buttonServer.addContext(new Button[]{this.buttonPlayMenu, this.buttonPlayResume, this.buttonPlaySettings, this.buttonPlayExit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // play menu
-        this.buttonServer.addContext(new Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new Button[]{}, new Button[]{}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // editor menu
-        this.buttonServer.addContext(new Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsMenuWorlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
-        this.buttonServer.addContext(new Button[]{this.buttonMenuBack, this.buttonMenuHost, this.buttonMenuConnect}, new Button[]{}, new Button[]{this.fieldMenuIP, this.fieldMenuPort}, new Button[][]{{}}, new Button[][]{{}}, new Button[][]{{}}); // choose host
+        this.fieldMenuIP = this.buttonServer.newButton(x, y0 + h * 0.0, w, h, "0.0.0.0");
+        this.fieldMenuPort = this.buttonServer.newButton(x, y0 + h * 1.0, w, h, "16384");
+        this.buttonMenuHost = this.buttonServer.newButton(x, y0 + h * 2.0, w, h, "HOST");
+        this.buttonMenuConnect = this.buttonServer.newButton(x, y0 + h * 3.0, w, h, "CONNECT");
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuPlay, this.buttonMenuSettings, this.buttonMenuCredits}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // main menu
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuBack}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // credits
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuBack}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // settings
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonPlayMenu, this.buttonPlayResume, this.buttonPlaySettings, this.buttonPlayExit}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // play menu
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // editor menu
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{this.buttonsMenuWorlds}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // choose world
+        this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuBack, this.buttonMenuHost, this.buttonMenuConnect}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{this.fieldMenuIP, this.fieldMenuPort}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // choose host
 
         this.keyServer = new KeyServer();
         this.keyServer.addKey('`');
+        this.keyServer.addKey(TAB);
+        this.keyServer.addKey('w');
+        this.keyServer.addKey('s');
+        this.keyServer.addKey('d');
+        this.keyServer.addKey('a');
+        this.keyServer.addKey(' ');
+        this.keyServer.addKey(SHIFT);
+        this.keyServer.addKey('q');
+        this.keyServer.addKey('e');
+        this.keyServer.addKey('i');
+        this.keyServer.addKey('k');
+        this.keyServer.addKey('l');
+        this.keyServer.addKey('j');
+        this.keyServer.addKey('p');
+        this.keyServer.addKey(';');
+        this.keyServer.addKey('u');
+        this.keyServer.addKey('o');
+        this.keyServer.addKey('1');
+        this.keyServer.addKey('2');
+        this.keyServer.addKey('3');
+        this.keyServer.addKey('4');
+        this.keyServer.addKey('5');
+        this.keyServer.addKey('6');
+        this.keyServer.addKey('-');
+        this.keyServer.addKey('+');
+        this.keyServer.addKey('/');
+        this.keyServer.addKey('*');
 
         this.xo = this.yo = this.swap = 0;
         this.buffer = new PImage[2];
@@ -150,8 +177,6 @@ class Interface {
         this.textureLoaderWork = new AtomicBoolean(false);
 
         this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
-
-        this.camera = new Camera();
     }
 
     public void draw() {
@@ -204,18 +229,18 @@ class Interface {
 
             this.drawBackground();
 
-            ArrayList<Button> buttonsList = new ArrayList<Button>();
+            ArrayList<ButtonServer.Button> buttonsList = new ArrayList<ButtonServer.Button>();
             float w = width / 2.0, h = height / 16.0;
             float x = (width - w) / 2.0, y0 = height / 8.0;
             for(String name : this.db.getXMLs()) {
-                buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
+                buttonsList.add(this.buttonServer.newButton(x, y0 + buttonsList.size() * h, w, h, name));
             }
-            this.buttonsMenuWorlds = new Button[buttonsList.size()];
+            this.buttonsMenuWorlds = new ButtonServer.Button[buttonsList.size()];
             this.buttonsMenuWorlds = buttonsList.toArray(this.buttonsMenuWorlds);
 
             this.context = 5;
 
-            this.buttonServer.setContext(this.context, new Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsMenuWorlds}, new Button[][]{{}}, new Button[][]{{}}); // choose world
+            this.buttonServer.setContext(this.context, new ButtonServer.Button[]{this.buttonMenuBack, this.buttonMenuSingleplayer, this.buttonMenuMultiplayer, this.buttonMenuEditor}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{this.buttonsMenuWorlds}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // choose world
         }
     }
 
@@ -330,7 +355,7 @@ class Interface {
             choose = 3;
         }
         if(choose != 0) {
-            for(Button button : this.buttonsMenuWorlds) {
+            for(ButtonServer.Button button : this.buttonsMenuWorlds) {
                 if(button.isActive()) {
                     this.buttonServer.clear(this.context);
 
@@ -342,7 +367,7 @@ class Interface {
                     this.drawBackground();
 
                     this.space = new Space(button.getContent(), this.db);
-                    this.camera = new Camera();
+                    this.camera = new Camera(this.keyServer);
                     noStroke();
                     fill(255);
                     this.skybox = createShape(SPHERE, 6E3);
@@ -350,11 +375,8 @@ class Interface {
                     this.skybox.rotateY(HALF_PI);
                     this.pause = false;
 
-                    this.telescope = new Telescope(0.0, 0.0, 0.0, 10.0, 10.0, this.space);
-                    this.telescope.getBody().setVelocity(110, 0, 0);
-                    this.telescope.getBody().setTexture(this.space.getTelescope());
-                    this.space.addBody(this.telescope.getBody());
-                    this.camera.setBody(this.telescope.getBody());
+                    this.telescope = new Telescope(this.space.getTelescope(), this.keyServer);
+                    this.camera.setRelativeBody(this.telescope.getBody());
 
                     this.textureLoader.kill();
                     this.textureLoader = null;
@@ -371,23 +393,28 @@ class Interface {
                 }
             }
 
-            if(choose == 1) {
-                this.context = 3;
-            } else if(choose == 2) {
-                this.context = 6;
-            } else if(choose == 3) {
-                ArrayList<Button> buttonsList = new ArrayList<Button>();
-                float w = width / 2.0, h = height / 16.0;
-                float x = (width - w) / 2.0, y0 = height / 8.0;
-                for(String name : this.db.getXMLs()) {
-                    buttonsList.add(new Button(x, y0 + buttonsList.size() * h, w, h, name));
-                }
-                this.buttonsEditorBodies = new Button[buttonsList.size()];
-                this.buttonsEditorBodies = buttonsList.toArray(this.buttonsEditorBodies);
+            switch(choose) {
+                case 1:
+                    this.context = 3;
+                    break;
+                case 2:
+                    this.context = 6;
+                    break;
+                case 3:
+                    ArrayList<ButtonServer.Button> buttonsList = new ArrayList<ButtonServer.Button>();
+                    float w = width / 2.0, h = height / 16.0;
+                    float x = (width - w) / 2.0, y0 = height / 8.0;
+                    for(String name : this.db.getXMLs()) {
+                        buttonsList.add(this.buttonServer.newButton(x, y0 + buttonsList.size() * h, w, h, name));
+                    }
+                    this.buttonsEditorBodies = new ButtonServer.Button[buttonsList.size()];
+                    this.buttonsEditorBodies = buttonsList.toArray(this.buttonsEditorBodies);
 
-                this.context = 4;
+                    this.context = 4;
 
-                this.buttonServer.setContext(this.context, new Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new Button[]{}, new Button[]{}, new Button[][]{this.buttonsEditorBodies}, new Button[][]{{}}, new Button[][]{{}}); // editor
+                    this.buttonServer.setContext(this.context, new ButtonServer.Button[]{this.buttonEditorMenu, this.buttonEditorSave, this.buttonEditorResume, this.buttonEditorSettings, this.buttonEditorExit}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{}, new ButtonServer.Button[][]{this.buttonsEditorBodies}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // editor
+
+                    break;
             }
         }
     }
@@ -532,90 +559,6 @@ class Interface {
         }
     }
 
-
-    private class Button {
-        private float x, y, w, h, b, c;
-        private String content;
-        private boolean active;
-
-
-        public Button(float x, float y, float w, float h, String content) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-            if(this.h <= this.w) {
-                this.b = this.h / 16.0;
-                this.c = this.h / 4.0;
-            } else {
-                this.b = this.w / 16.0;
-                this.c = this.w / 4.0;
-            }
-            this.content = content;
-            this.active = false;
-        }
-
-        public Button(float x, float y, float w, float h, float b, float c, String content) {
-            this(x, y, w, h, content);
-            this.b = b;
-            this.c = c;
-        }
-
-        public boolean isPressed() {
-            return (this.content.length() > 0 && mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
-        }
-
-        public void draw() {
-            if(this.active) {
-                fill(255, 127);
-            } else {
-                fill(0, 127);
-            }
-            stroke(255);
-            strokeWeight(this.b);
-            rect(this.x, this.y, this.w, this.h, this.c, this.c, this.c, this.c);
-            if(this.active) {
-                fill(0);
-            } else {
-                fill(255);
-            }
-            stroke(0);
-            strokeWeight(1);
-            textSize(16);
-            text(this.content, this.x + (this.w - textWidth(this.content)) / 2.0, this.y + this.h / 2.0);
-            noFill();
-        }
-
-        public void activate() {
-            this.active = true;
-        }
-
-        public void deactivate() {
-            this.active = false;
-        }
-
-        public void toggle() {
-            this.active = !this.active;
-        }
-
-        public boolean isActive() {
-            return this.active;
-        }
-
-        public void pop() {
-             if(this.content.length() >= 1) {
-                 this.content = this.content.substring(0, this.content.length() - 1);
-             }
-        }
-
-        public void push(char character) {
-            this.content += character;
-        }
-
-        public String getContent() {
-            return this.content;
-        }
-    }
 
     private class ButtonServer {
         private ArrayList<Button[]> buttons;
@@ -810,38 +753,101 @@ class Interface {
                 }
             }
         }
-    }
 
+        public Button newButton(float x, float y, float w, float h, String content) {
+            return new Button(x, y, w, h, content);
+        }
 
-    private class Key {
-        private char content;
-        private int timeLastPress, timeBetweenPresses;
-
-
-        public Key(char content) {
-            this.content = content;
-
-            this.timeLastPress = 0;
-            this.timeBetweenPresses = 300;
+        public Button newButton(float x, float y, float w, float h, float b, float c, String content) {
+            return new Button(x, y, w, h, b, c, content);
         }
 
 
-        public boolean isPressed() {
-            return (keyPressed && key == this.content);
-        }
+        private class Button {
+            private float x, y, w, h, b, c;
+            private String content;
+            private boolean active;
 
-        public boolean isClicked() {
-            if(keyPressed && key == this.content && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                this.timeLastPress = millis();
-                return true;
+
+            public Button(float x, float y, float w, float h, String content) {
+                this.x = x;
+                this.y = y;
+                this.w = w;
+                this.h = h;
+                if(this.h <= this.w) {
+                    this.b = this.h / 16.0;
+                    this.c = this.h / 4.0;
+                } else {
+                    this.b = this.w / 16.0;
+                    this.c = this.w / 4.0;
+                }
+                this.content = content;
+                this.active = false;
             }
-            return false;
-        }
 
-        public char getContent() {
-            return this.content;
+            public Button(float x, float y, float w, float h, float b, float c, String content) {
+                this(x, y, w, h, content);
+                this.b = b;
+                this.c = c;
+            }
+
+            public boolean isPressed() {
+                return (this.content.length() > 0 && mousePressed && mouseX >= this.x && mouseX <= this.x + this.w && mouseY >= this.y && mouseY <= this.y + this.h);
+            }
+
+            public void draw() {
+                if(this.active) {
+                    fill(255, 127);
+                } else {
+                    fill(0, 127);
+                }
+                stroke(255);
+                strokeWeight(this.b);
+                rect(this.x, this.y, this.w, this.h, this.c, this.c, this.c, this.c);
+                if(this.active) {
+                    fill(0);
+                } else {
+                    fill(255);
+                }
+                stroke(0);
+                strokeWeight(1);
+                textSize(16);
+                text(this.content, this.x + (this.w - textWidth(this.content)) / 2.0, this.y + this.h / 2.0);
+                noFill();
+            }
+
+            public void activate() {
+                this.active = true;
+            }
+
+            public void deactivate() {
+                this.active = false;
+            }
+
+            public void toggle() {
+                this.active = !this.active;
+            }
+
+            public boolean isActive() {
+                return this.active;
+            }
+
+            public void pop() {
+                 if(this.content.length() >= 1) {
+                     this.content = this.content.substring(0, this.content.length() - 1);
+                 }
+            }
+
+            public void push(char character) {
+                this.content += character;
+            }
+
+            public String getContent() {
+                return this.content;
+            }
         }
     }
+
 
     private class KeyServer {
         private ArrayList<Key> keys;
@@ -856,6 +862,10 @@ class Interface {
             this.keys.add(new Key(content));
         }
 
+        public void addKey(int content) {
+            this.keys.add(new Key(content));
+        }
+
         public void removeKey(char content) {
             Iterator<Key> iter = this.keys.iterator();
             while (iter.hasNext()) {
@@ -863,6 +873,10 @@ class Interface {
                     iter.remove();
                 }
             }
+        }
+
+        public void removeKey(int content) {
+            this.removeKey((char)content);
         }
 
         public boolean isPressed(char content) {
@@ -874,6 +888,10 @@ class Interface {
             return false;
         }
 
+        public boolean isPressed(int content) {
+            return this.isPressed((char)content);
+        }
+
         public boolean isClicked(char content) {
             for(Key key : this.keys) {
                 if(key.getContent() == content) {
@@ -881,6 +899,49 @@ class Interface {
                 }
             }
             return false;
+        }
+
+        public boolean isClicked(int content) {
+            return this.isClicked((char)content);
+        }
+
+
+        private class Key {
+            private char content;
+            private int timeLastPress, timeBetweenPresses;
+            private boolean coded;
+
+
+            public Key(char content) {
+                this.content = content;
+
+                this.timeLastPress = 0;
+                this.timeBetweenPresses = 300;
+                this.coded = false;
+            }
+
+            public Key(int content) {
+                this((char)content);
+
+                this.coded = true;
+            }
+
+
+            public boolean isPressed() {
+                return (keyPressed && ((!this.coded && key == this.content) || (this.coded && keyCode == (int)this.content)));
+            }
+
+            public boolean isClicked() {
+                if(this.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                    this.timeLastPress = millis();
+                    return true;
+                }
+                return false;
+            }
+
+            public char getContent() {
+                return this.content;
+            }
         }
     }
 
@@ -890,15 +951,20 @@ class Interface {
         private float speed, angleSpeed, pitchAndYawToRollRatio;
         private float zoom;
         private final float zoomInit, zoomMin, zoomMax, zoomDiffDiv;
-        private boolean dof5or6, bodyView;
-        private Space.Body body;
-        private float bodyViewDistance;
-        private final float bodyViewDistanceInit, bodyViewDistanceMin, bodyViewDistanceMax, bodyViewDistanceDiffDiv;
+
+        private boolean dof5or6;
+
+        private int viewingMode;
+        private Space.Body relativeBody;
+        private float relativeDistance;
+        private final float relativeDistanceInit, relativeDistanceMin, relativeDistanceMax, relativeDistanceDiffDiv;
 
         private Robot mouse;
 
+        private KeyServer keyServer;
 
-        public Camera() {
+
+        public Camera(KeyServer keyServer) {
             this.positionX = this.positionY = this.positionZ = 0.0;
             this.forwardX = this.forwardY = 0.0;
             this.forwardZ = 1.0;
@@ -914,28 +980,39 @@ class Interface {
             this.zoomMin = 5E-1;
             this.zoomMax = 36E2;
             this.zoomDiffDiv = 1E2;
+
             this.dof5or6 = true;
-            this.bodyView = false;
-            this.bodyViewDistance = 10;
-            this.bodyViewDistanceInit = this.bodyViewDistance;
-            this.bodyViewDistanceMin = 1E0;
-            this.bodyViewDistanceMax = 1E3;
-            this.bodyViewDistanceDiffDiv = 1E1;
+
+            this.viewingMode = 0;
+            this.relativeDistance = 10.0;
+            this.relativeDistanceInit = this.relativeDistance;
+            this.relativeDistanceMin = 1E0;
+            this.relativeDistanceMax = 1E3;
+            this.relativeDistanceDiffDiv = 1E1;
 
             try {
                 this.mouse = new Robot();
             } catch(AWTException e) {}
+
+            this.keyServer = keyServer;
         }
 
 
         public void begin() {
+            PVector bodyPosition = this.relativeBody.getPosition();
+            float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
             beginCamera();
-            if(this.bodyView == false) {
-                camera(this.positionX, this.positionY, this.positionZ, this.positionX + this.forwardX, this.positionY + this.forwardY, this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
-            } else {
-                PVector bodyPosition = this.body.getPosition();
-                float r = this.body.getRadius() * this.bodyViewDistance;
-                camera(bodyPosition.x - r * this.forwardX, bodyPosition.y - r * this.forwardY, bodyPosition.z - r * this.forwardZ, bodyPosition.x, bodyPosition.y, bodyPosition.z, this.upX, this.upY, this.upZ);
+            switch(this.viewingMode) {
+                case 0:
+                    camera(this.positionX, this.positionY, this.positionZ, this.positionX + this.forwardX, this.positionY + this.forwardY, this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
+                    break;
+                case 1:
+                    camera(x + this.positionX, y + this.positionY, z + this.positionZ, x + this.positionX + this.forwardX, y + this.positionY + this.forwardY, z + this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
+                    break;
+                case 2:
+                    float r = this.relativeDistance * this.relativeBody.getRadius();
+                    camera(x - r * this.forwardX, y - r * this.forwardY, z - r * this.forwardZ, x, y, z, this.upX, this.upY, this.upZ);
+                    break;
             }
 
             float fov = PI / 3.0 / zoom;
@@ -946,16 +1023,26 @@ class Interface {
         public void begin(PShape skybox) {
             this.begin();
 
-            if(this.bodyView == false) {
-                translate(this.positionX, this.positionY, this.positionZ);
-                shape(skybox, 0, 0);
-                translate(-this.positionX, -this.positionY, -this.positionZ);
-            } else {
-                PVector bodyPosition = this.body.getPosition();
-                float r = this.body.getRadius() * this.bodyViewDistance;
-                translate(bodyPosition.x - r * this.forwardX, bodyPosition.y - r * this.forwardY, bodyPosition.z - r * this.forwardZ);
-                shape(skybox, 0, 0);
-                translate(-(bodyPosition.x - r * this.forwardX), -(bodyPosition.y - r * this.forwardY), -(bodyPosition.z - r * this.forwardZ));
+            PVector bodyPosition = this.relativeBody.getPosition();
+            float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
+            float r = this.relativeBody.getRadius() * this.relativeDistance;
+
+            switch(this.viewingMode) {
+                case 0:
+                    translate(this.positionX, this.positionY, this.positionZ);
+                    shape(skybox, 0, 0);
+                    translate(-this.positionX, -this.positionY, -this.positionZ);
+                    break;
+                case 1:
+                    translate(x + this.positionX, y + this.positionY, z + this.positionZ);
+                    shape(skybox, 0, 0);
+                    translate(-(x + this.positionX), -(y + this.positionY), -(z + this.positionZ));
+                    break;
+                case 2:
+                    translate(x - r * this.forwardX, y - r * this.forwardY, z - r * this.forwardZ);
+                    shape(skybox, 0, 0);
+                    translate(-(x - r * this.forwardX), -(y - r * this.forwardY), -(z - r * this.forwardZ));
+                    break;
             }
         }
 
@@ -967,7 +1054,7 @@ class Interface {
             float[] quaternion;
             PVector vector;
 
-            if(this.dof5or6 == true) { // 6 degrees of freedom
+            if(this.dof5or6) { // 6 degrees of freedom
                 if(mouseX != pmouseX) { // rotate left or right
                     quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
@@ -1033,128 +1120,174 @@ class Interface {
 
             this.mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
 
-            if(keyPressed) {
-                if(key == 'w') { // move forward
-                    this.positionX += this.forwardX * this.speed;
-                    this.positionY += this.forwardY * this.speed;
-                    this.positionZ += this.forwardZ * this.speed;
-                }
-                if(key == 's') { // move backward
-                    this.positionX -= this.forwardX * this.speed;
-                    this.positionY -= this.forwardY * this.speed;
-                    this.positionZ -= this.forwardZ * this.speed;
-                }
-                if(key == 'd') { // move right
-                    this.positionX += -this.rightX * this.speed;
-                    this.positionY += -this.rightY * this.speed;
-                    this.positionZ += -this.rightZ * this.speed;
-                }
-                if(key == 'a') { // move left
-                    this.positionX -= -this.rightX * this.speed;
-                    this.positionY -= -this.rightY * this.speed;
-                    this.positionZ -= -this.rightZ * this.speed;
-                }
-                if(key == ' ') { // move up
-                    this.positionX -= this.upX * this.speed;
-                    this.positionY -= this.upY * this.speed;
-                    this.positionZ -= this.upZ * this.speed;
-                }
-                if(keyCode == SHIFT) { // move down
-                    this.positionX += this.upX * this.speed;
-                    this.positionY += this.upY * this.speed;
-                    this.positionZ += this.upZ * this.speed;
-                }
-                if(key == 'q') { // spin left
-                    quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.upX = vector.x;
-                    this.upY = vector.y;
-                    this.upZ = vector.z;
+            if(this.keyServer.isPressed('w')) { // move forward
+                this.positionX += this.forwardX * this.speed;
+                this.positionY += this.forwardY * this.speed;
+                this.positionZ += this.forwardZ * this.speed;
+            }
+            if(this.keyServer.isPressed('s')) { // move backward
+                this.positionX -= this.forwardX * this.speed;
+                this.positionY -= this.forwardY * this.speed;
+                this.positionZ -= this.forwardZ * this.speed;
+            }
+            if(this.keyServer.isPressed('d')) { // move right
+                this.positionX += -this.rightX * this.speed;
+                this.positionY += -this.rightY * this.speed;
+                this.positionZ += -this.rightZ * this.speed;
+            }
+            if(this.keyServer.isPressed('a')) { // move left
+                this.positionX -= -this.rightX * this.speed;
+                this.positionY -= -this.rightY * this.speed;
+                this.positionZ -= -this.rightZ * this.speed;
+            }
+            if(this.keyServer.isPressed(' ')) { // move up
+                this.positionX -= this.upX * this.speed;
+                this.positionY -= this.upY * this.speed;
+                this.positionZ -= this.upZ * this.speed;
+            }
+            if(this.keyServer.isPressed(SHIFT)) { // move down
+                this.positionX += this.upX * this.speed;
+                this.positionY += this.upY * this.speed;
+                this.positionZ += this.upZ * this.speed;
+            }
+            if(this.keyServer.isPressed('q')) { // spin left
+                quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.rightX = vector.x;
-                    this.rightY = vector.y;
-                    this.rightZ = vector.z;
+                quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.upX = vector.x;
-                    this.upY = vector.y;
-                    this.upZ = vector.z;
+                quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+            }
+            if(this.keyServer.isPressed('e')) { // spin right
+                quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+
+                quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
+
+                quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+            }
+            if(this.keyServer.isPressed('1')) {
+                this.zoom -= this.zoom / this.zoomDiffDiv;
+                if(this.zoom < this.zoomMin) {
+                    this.zoom = this.zoomMin;
                 }
-                if(key == 'e') { // spin right
-                    quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.upX = vector.x;
-                    this.upY = vector.y;
-                    this.upZ = vector.z;
-
-                    quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.rightX = vector.x;
-                    this.rightY = vector.y;
-                    this.rightZ = vector.z;
-
-                    quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
-                    vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
-                    vector.normalize();
-                    this.upX = vector.x;
-                    this.upY = vector.y;
-                    this.upZ = vector.z;
+            }
+            if(this.keyServer.isPressed('2')) {
+                this.zoom = this.zoomInit;
+            }
+            if(this.keyServer.isPressed('3')) {
+                this.zoom += this.zoom / this.zoomDiffDiv;
+                if(this.zoom > this.zoomMax) {
+                    this.zoom = this.zoomMax;
                 }
-                if(key == '1') {
-                    this.zoom -= this.zoom / this.zoomDiffDiv;
-                    if(this.zoom < this.zoomMin) {
-                        this.zoom = this.zoomMin;
+            }
+            if(this.keyServer.isPressed('4')) {
+                if(this.viewingMode != 0) {
+                    this.relativeDistance -= this.relativeDistance / this.relativeDistanceDiffDiv;
+                    if(this.relativeDistance < this.relativeDistanceMin) {
+                        this.relativeDistance = this.relativeDistanceMin;
                     }
                 }
-                if(key == '2') {
-                    this.zoom = this.zoomInit;
+            }
+            if(this.keyServer.isPressed('5')) {
+                if(this.viewingMode != 0) {
+                    this.relativeDistance = this.relativeDistanceInit;
                 }
-                if(key == '3') {
-                    this.zoom += this.zoom / this.zoomDiffDiv;
-                    if(this.zoom > this.zoomMax) {
-                        this.zoom = this.zoomMax;
+            }
+            if(this.keyServer.isPressed('6')) {
+                if(this.viewingMode != 0) {
+                    this.relativeDistance += this.relativeDistance / this.relativeDistanceDiffDiv;
+                    if(this.relativeDistance > this.relativeDistanceMax) {
+                        this.relativeDistance = this.relativeDistanceMax;
                     }
                 }
-                if(key == '4' && this.bodyView == true) {
-                    this.bodyViewDistance -= this.bodyViewDistance / this.bodyViewDistanceDiffDiv;
-                    if(this.bodyViewDistance < this.bodyViewDistanceMin) {
-                        this.bodyViewDistance = this.bodyViewDistanceMin;
-                    }
+            }
+            if(this.keyServer.isPressed('-')) {
+                this.dof5or6 = false;
+            }
+            if(this.keyServer.isPressed('+')) {
+                this.dof5or6 = true;
+            }
+            if(this.keyServer.isClicked('/')) {
+                PVector bodyPosition = this.relativeBody.getPosition();
+                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
+                float r = this.relativeDistance * this.relativeBody.getRadius();
+                switch(--this.viewingMode) {
+                    case 0:
+                        this.positionX += x;
+                        this.positionY += y;
+                        this.positionZ += z;
+                        break;
+                    case 1:
+                        this.positionX += x;
+                        this.positionY += y;
+                        this.positionZ += z;
+                        break;
+                    default:
+                        this.positionX = r;
+                        this.positionY = r;
+                        this.positionZ = r;
+
+                        this.viewingMode = 2;
+                        break;
                 }
-                if(key == '5' && this.bodyView == true) {
-                    this.bodyViewDistance = this.bodyViewDistanceInit;
-                }
-                if(key == '6' && this.bodyView == true) {
-                    this.bodyViewDistance += this.bodyViewDistance / this.bodyViewDistanceDiffDiv;
-                    if(this.bodyViewDistance > this.bodyViewDistanceMax) {
-                        this.bodyViewDistance = this.bodyViewDistanceMax;
-                    }
-                }
-                if(key == '-') {
-                    this.dof5or6 = false;
-                }
-                if(key == '+') {
-                    this.dof5or6 = true;
-                }
-                if(key == '/') {
-                    this.bodyView = false;
-                }
-                if(key == '*') {
-                    this.bodyView = true;
+            }
+            if(this.keyServer.isClicked('*')) {
+                PVector bodyPosition = this.relativeBody.getPosition();
+                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
+                float r = this.relativeDistance * this.relativeBody.getRadius();
+                switch(++this.viewingMode) {
+                    case 1:
+                        this.positionX = r;
+                        this.positionY = r;
+                        this.positionZ = r;
+                        break;
+                    case 2:
+                        this.positionX = r;
+                        this.positionY = r;
+                        this.positionZ = r;
+                        break;
+                    default:
+                        this.positionX += x;
+                        this.positionY += y;
+                        this.positionZ += z;
+
+                        this.viewingMode = 0;
+                        break;
                 }
             }
         }
 
-        public void setBody(Space.Body body) {
-            this.body = body;
+        public void setRelativeBody(Space.Body relativeBody) {
+            this.relativeBody = relativeBody;
         }
 
         public float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
@@ -1181,13 +1314,42 @@ class Interface {
 
     private class Telescope {
         private Space.Body body;
+        private KeyServer keyServer;
 
-        public Telescope(float x, float y, float z, float mass, float radius, Space space) {
-            this.body = space.new Body(x, y, z, mass, radius);
+        public Telescope(Space.Body body, KeyServer keyServer) {
+            this.body = body;
+            this.keyServer = keyServer;
         }
 
         public Space.Body getBody() {
             return this.body;
+        }
+
+        public void controls() {
+            if(this.keyServer.isPressed('i')) {
+                
+            }
+            if(this.keyServer.isPressed('k')) {
+                
+            }
+            if(this.keyServer.isPressed('l')) {
+                
+            }
+            if(this.keyServer.isPressed('j')) {
+                
+            }
+            if(this.keyServer.isPressed('p')) {
+                
+            }
+            if(this.keyServer.isPressed(';')) {
+                
+            }
+            if(this.keyServer.isPressed('u')) {
+                
+            }
+            if(this.keyServer.isPressed('o')) {
+                
+            }
         }
     }
 
