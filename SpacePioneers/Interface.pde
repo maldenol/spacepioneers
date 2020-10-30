@@ -75,6 +75,8 @@ class Interface {
 
     private PShape skybox;
 
+    private boolean controlCameraOrTelescope;
+
     private Camera camera;
 
     private Telescope telescope;
@@ -87,6 +89,8 @@ class Interface {
 
         this.pause = false;
         this.speed = 1.0;
+
+        this.controlCameraOrTelescope = false;
 
         this.buttonServer = new ButtonServer();
         float w, h, x, y0;
@@ -139,8 +143,8 @@ class Interface {
         this.buttonServer.addContext(new ButtonServer.Button[]{this.buttonMenuBack, this.buttonMenuHost, this.buttonMenuConnect}, new ButtonServer.Button[]{}, new ButtonServer.Button[]{this.fieldMenuIP, this.fieldMenuPort}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}, new ButtonServer.Button[][]{{}}); // choose host
 
         this.keyServer = new KeyServer();
-        this.keyServer.addKey('`');
         this.keyServer.addKey(TAB);
+        this.keyServer.addKey('`');
         this.keyServer.addKey('w');
         this.keyServer.addKey('s');
         this.keyServer.addKey('d');
@@ -149,20 +153,19 @@ class Interface {
         this.keyServer.addKey(SHIFT);
         this.keyServer.addKey('q');
         this.keyServer.addKey('e');
-        this.keyServer.addKey('i');
-        this.keyServer.addKey('k');
-        this.keyServer.addKey('l');
-        this.keyServer.addKey('j');
-        this.keyServer.addKey('p');
-        this.keyServer.addKey(';');
-        this.keyServer.addKey('u');
-        this.keyServer.addKey('o');
+        this.keyServer.addKey(UP);
+        this.keyServer.addKey(DOWN);
+        this.keyServer.addKey(RIGHT);
+        this.keyServer.addKey(LEFT);
         this.keyServer.addKey('1');
         this.keyServer.addKey('2');
         this.keyServer.addKey('3');
         this.keyServer.addKey('4');
         this.keyServer.addKey('5');
         this.keyServer.addKey('6');
+        this.keyServer.addKey('7');
+        this.keyServer.addKey('8');
+        this.keyServer.addKey('9');
         this.keyServer.addKey('-');
         this.keyServer.addKey('+');
         this.keyServer.addKey('/');
@@ -176,7 +179,7 @@ class Interface {
         this.buffer[0].resize(width, height);
         this.textureLoaderWork = new AtomicBoolean(false);
 
-        this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\nFebruary-March 2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
+        this.creditsContent = "Space Pioneers\n\nCreated by Malovanyi Denys Olehovych\n2018-2020\n\nhttps://gitlab.com/maldenol/spacepioneers\nThis project is licensed under the GNU Affero General Public License v3.0.\n\nThanks for playing!";
     }
 
     public void draw() {
@@ -299,7 +302,19 @@ class Interface {
 
         if(!this.pause) {
             this.space.tick();
-            this.camera.controls();
+
+            if(!this.controlCameraOrTelescope) {
+                this.camera.controls();
+            } else {
+                this.telescope.controls();
+            }
+
+            if(this.keyServer.isPressed('*')) { // camera controls
+                this.controlCameraOrTelescope = false;
+            }
+            if(this.keyServer.isPressed('/')) { // telescope controls
+                this.controlCameraOrTelescope = true;
+            }
         }
 
         background(0);
@@ -1055,44 +1070,44 @@ class Interface {
             PVector vector;
 
             if(this.dof5or6) { // 6 degrees of freedom
-                if(mouseX != pmouseX) { // rotate left or right
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                if(mouseX != pmouseX) { // yaw
+                    quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
                     this.forwardY = vector.y;
                     this.forwardZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                    quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.rightX = vector.x;
                     this.rightY = vector.y;
                     this.rightZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                    quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
                     this.forwardY = vector.y;
                     this.forwardZ = vector.z;
                 }
-                if(mouseY != pmouseY) { // rotate up or down
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                if(mouseY != pmouseY) { // pitch
+                    quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
                     this.forwardY = vector.y;
                     this.forwardZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                    quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.upX = vector.x;
                     this.upY = vector.y;
                     this.upZ = vector.z;
 
-                    quaternion = this.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                    quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -1101,7 +1116,7 @@ class Interface {
                 }
             } else { // 5 degrees of freedom
                 if(mouseX != pmouseX) { // rotate left or right
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -1109,7 +1124,7 @@ class Interface {
                     this.forwardZ = vector.z;
                 }
                 if(mouseY != pmouseY) { // rotate up or down
-                    quaternion = this.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                     vector.normalize();
                     this.forwardX = vector.x;
@@ -1150,66 +1165,66 @@ class Interface {
                 this.positionY += this.upY * this.speed;
                 this.positionZ += this.upZ * this.speed;
             }
-            if(this.keyServer.isPressed('q')) { // spin left
-                quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
+            if(this.keyServer.isPressed('q')) { // roll counterclockwise
+                quaternion = rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.upX = vector.x;
                 this.upY = vector.y;
                 this.upZ = vector.z;
 
-                quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.rightX = vector.x;
                 this.rightY = vector.y;
                 this.rightZ = vector.z;
 
-                quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.upX = vector.x;
                 this.upY = vector.y;
                 this.upZ = vector.z;
             }
-            if(this.keyServer.isPressed('e')) { // spin right
-                quaternion = this.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
+            if(this.keyServer.isPressed('e')) { // roll clockwise
+                quaternion = rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.upX = vector.x;
                 this.upY = vector.y;
                 this.upZ = vector.z;
 
-                quaternion = this.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.rightX = vector.x;
                 this.rightY = vector.y;
                 this.rightZ = vector.z;
 
-                quaternion = this.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                 vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
                 vector.normalize();
                 this.upX = vector.x;
                 this.upY = vector.y;
                 this.upZ = vector.z;
             }
-            if(this.keyServer.isPressed('1')) {
+            if(this.keyServer.isPressed('1')) { // zoom out
                 this.zoom -= this.zoom / this.zoomDiffDiv;
                 if(this.zoom < this.zoomMin) {
                     this.zoom = this.zoomMin;
                 }
             }
-            if(this.keyServer.isPressed('2')) {
+            if(this.keyServer.isPressed('2')) { // normal zoom
                 this.zoom = this.zoomInit;
             }
-            if(this.keyServer.isPressed('3')) {
+            if(this.keyServer.isPressed('3')) { // zoom in
                 this.zoom += this.zoom / this.zoomDiffDiv;
                 if(this.zoom > this.zoomMax) {
                     this.zoom = this.zoomMax;
                 }
             }
-            if(this.keyServer.isPressed('4')) {
+            if(this.keyServer.isPressed('4')) { // increase relative distance
                 if(this.viewingMode != 0) {
                     this.relativeDistance -= this.relativeDistance / this.relativeDistanceDiffDiv;
                     if(this.relativeDistance < this.relativeDistanceMin) {
@@ -1217,12 +1232,12 @@ class Interface {
                     }
                 }
             }
-            if(this.keyServer.isPressed('5')) {
+            if(this.keyServer.isPressed('5')) { // normal relative distance
                 if(this.viewingMode != 0) {
                     this.relativeDistance = this.relativeDistanceInit;
                 }
             }
-            if(this.keyServer.isPressed('6')) {
+            if(this.keyServer.isPressed('6')) { // decrease relative distance
                 if(this.viewingMode != 0) {
                     this.relativeDistance += this.relativeDistance / this.relativeDistanceDiffDiv;
                     if(this.relativeDistance > this.relativeDistanceMax) {
@@ -1230,125 +1245,240 @@ class Interface {
                     }
                 }
             }
-            if(this.keyServer.isPressed('-')) {
+            if(this.keyServer.isPressed('7')) { // absolute viewing mode
+                PVector bodyPosition = this.relativeBody.getPosition();
+                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
+                float r = this.relativeDistance * this.relativeBody.getRadius();
+                if(this.viewingMode == 1) {
+                    this.positionX += x;
+                    this.positionY += y;
+                    this.positionZ += z;
+                }
+                if(this.viewingMode == 2) {
+                    this.positionX = x - r * this.forwardX;
+                    this.positionY = y - r * this.forwardY;
+                    this.positionZ = z - r * this.forwardZ;
+                }
+
+                this.viewingMode = 0;
+            }
+            if(this.keyServer.isPressed('8')) { // absolute-relative viewing mode
+                PVector bodyPosition = this.relativeBody.getPosition();
+                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
+                float r = this.relativeDistance * this.relativeBody.getRadius();
+                if(this.viewingMode == 0) {
+                    this.positionX -= x;
+                    this.positionY -= y;
+                    this.positionZ -= z;
+                }
+                if(this.viewingMode == 2) {
+                    this.positionX = -r * this.forwardX;
+                    this.positionY = -r * this.forwardY;
+                    this.positionZ = -r * this.forwardZ;
+                }
+
+                this.viewingMode = 1;
+            }
+            if(this.keyServer.isPressed('9')) { // relative viewing mode
+                this.viewingMode = 2;
+            }
+            if(this.keyServer.isPressed('-')) { // 5 degree of freedom
                 this.dof5or6 = false;
             }
-            if(this.keyServer.isPressed('+')) {
+            if(this.keyServer.isPressed('+')) { // 6 degree of freedom
                 this.dof5or6 = true;
-            }
-            if(this.keyServer.isClicked('/')) {
-                PVector bodyPosition = this.relativeBody.getPosition();
-                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
-                float r = this.relativeDistance * this.relativeBody.getRadius();
-                switch(--this.viewingMode) {
-                    case 0:
-                        this.positionX += x;
-                        this.positionY += y;
-                        this.positionZ += z;
-                        break;
-                    case 1:
-                        this.positionX += x;
-                        this.positionY += y;
-                        this.positionZ += z;
-                        break;
-                    default:
-                        this.positionX = r;
-                        this.positionY = r;
-                        this.positionZ = r;
-
-                        this.viewingMode = 2;
-                        break;
-                }
-            }
-            if(this.keyServer.isClicked('*')) {
-                PVector bodyPosition = this.relativeBody.getPosition();
-                float x = bodyPosition.x, y = bodyPosition.y, z = bodyPosition.z;
-                float r = this.relativeDistance * this.relativeBody.getRadius();
-                switch(++this.viewingMode) {
-                    case 1:
-                        this.positionX = r;
-                        this.positionY = r;
-                        this.positionZ = r;
-                        break;
-                    case 2:
-                        this.positionX = r;
-                        this.positionY = r;
-                        this.positionZ = r;
-                        break;
-                    default:
-                        this.positionX += x;
-                        this.positionY += y;
-                        this.positionZ += z;
-
-                        this.viewingMode = 0;
-                        break;
-                }
             }
         }
 
         public void setRelativeBody(Space.Body relativeBody) {
             this.relativeBody = relativeBody;
         }
-
-        public float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
-            float[] p = new float[]{0, px, py, pz};
-            float[] a = new float[]{cos(angle), sin(angle) * ax, sin(angle) * ay, sin(angle) * az};
-
-            p[0] = 0 - (a[1]) * (p[1]) - (a[2]) * (p[2]) - (a[3]) * (p[3]);
-            p[1] = (a[0]) * (p[1]) + 0 + (a[2]) * (p[3]) - (a[3]) * (p[2]);
-            p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0 + (a[3]) * (p[1]);
-            p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0;
-
-            p[0] = + (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
-            p[1] = - (p[0]) * (a[1]) + (p[1]) * (a[0]) - (p[2]) * (a[3]) + (p[3]) * (a[2]);
-            p[2] = - (p[0]) * (a[2]) + (p[1]) * (a[3]) + (p[2]) * (a[0]) - (p[3]) * (a[1]);
-            p[3] = - (p[0]) * (a[3]) - (p[1]) * (a[2]) + (p[2]) * (a[1]) + (p[3]) * (a[0]);
-
-            return new float[]{p[1], p[2], p[3]};
-        }
-
-        public float[] vectorProduct(float x1, float y1, float z1, float x2, float y2, float z2) {
-            return new float[]{y1 * z2 - y2 * z1, x2 * z1 - x1 * z2, x1 * y2 - x2 * y1};
-        }
     }
 
     private class Telescope {
         private Space.Body body;
+
+        private float positionX, positionY, positionZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
+        private float speed, angleSpeed, pitchAndYawToRollRatio;
+
         private KeyServer keyServer;
+
 
         public Telescope(Space.Body body, KeyServer keyServer) {
             this.body = body;
+
+            this.positionX = this.positionY = this.positionZ = 0.0;
+            this.forwardX = this.forwardY = 0.0;
+            this.forwardZ = 1.0;
+            this.upX = this.upZ = 0.0;
+            this.upY = 1.0;
+            this.rightX = 1.0;
+            this.rightY = this.rightZ = 0.0;
+            this.angleSpeed = TWO_PI / FPS * 2E-1;
+            this.pitchAndYawToRollRatio = 8.0;
+            this.speed = 1E-2;
+
             this.keyServer = keyServer;
         }
+
 
         public Space.Body getBody() {
             return this.body;
         }
 
         public void controls() {
-            if(this.keyServer.isPressed('i')) {
-                
+            float[] quaternion;
+            PVector vector;
+
+            if(this.keyServer.isPressed('w')) { // move forward
+                this.body.accelerate(new PVector(this.forwardX * this.speed, this.forwardY * this.speed, this.forwardZ * this.speed));
             }
-            if(this.keyServer.isPressed('k')) {
-                
+            if(this.keyServer.isPressed('s')) { // move backward
+                this.body.accelerate(new PVector(-this.forwardX * this.speed, -this.forwardY * this.speed, -this.forwardZ * this.speed));
             }
-            if(this.keyServer.isPressed('l')) {
-                
+            if(this.keyServer.isPressed('d')) { // move right
+                this.body.accelerate(new PVector(this.rightX * this.speed, this.rightY * this.speed, this.rightZ * this.speed));
             }
-            if(this.keyServer.isPressed('j')) {
-                
+            if(this.keyServer.isPressed('a')) { // move left
+                this.body.accelerate(new PVector(-this.rightX * this.speed, -this.rightY * this.speed, -this.rightZ * this.speed));
             }
-            if(this.keyServer.isPressed('p')) {
-                
+            if(this.keyServer.isPressed(' ')) { // move up
+                this.body.accelerate(new PVector(this.upX * this.speed, this.upY * this.speed, this.upZ * this.speed));
             }
-            if(this.keyServer.isPressed(';')) {
-                
+            if(this.keyServer.isPressed(SHIFT)) { // move down
+                this.body.accelerate(new PVector(-this.upX * this.speed, -this.upY * this.speed, -this.upZ * this.speed));
             }
-            if(this.keyServer.isPressed('u')) {
-                
+            if(this.keyServer.isPressed(UP)) { // pitch up
+                quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, this.angleSpeed * this.pitchAndYawToRollRatio);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+
+                quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
             }
-            if(this.keyServer.isPressed('o')) {
-                
+            if(this.keyServer.isPressed(DOWN)) { // pitch down
+                quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, -this.angleSpeed * this.pitchAndYawToRollRatio);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+
+                quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+            }
+            if(this.keyServer.isPressed(RIGHT)) { // yaw right
+                quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, this.angleSpeed * this.pitchAndYawToRollRatio);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
+
+                quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+            }
+            if(this.keyServer.isPressed(LEFT)) { // yaw left
+                quaternion = rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, -this.angleSpeed * this.pitchAndYawToRollRatio);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
+
+                quaternion = vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.forwardX = vector.x;
+                this.forwardY = vector.y;
+                this.forwardZ = vector.z;
+            }
+            if(this.keyServer.isPressed('q')) { // roll counterclockwise
+                quaternion = rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
+
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+            }
+            if(this.keyServer.isPressed('e')) { // roll clockwise
+                quaternion = rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
+
+                quaternion = vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.rightX = vector.x;
+                this.rightY = vector.y;
+                this.rightZ = vector.z;
+
+                quaternion = vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                vector = new PVector(quaternion[0], quaternion[1], quaternion[2]);
+                vector.normalize();
+                this.upX = vector.x;
+                this.upY = vector.y;
+                this.upZ = vector.z;
             }
         }
     }
@@ -1438,5 +1568,27 @@ class Interface {
         public void kill() {
             this.killed = true;
         }
+    }
+
+
+    public float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
+        float[] p = new float[]{0, px, py, pz};
+        float[] a = new float[]{cos(angle), sin(angle) * ax, sin(angle) * ay, sin(angle) * az};
+
+        p[0] = 0 - (a[1]) * (p[1]) - (a[2]) * (p[2]) - (a[3]) * (p[3]);
+        p[1] = (a[0]) * (p[1]) + 0 + (a[2]) * (p[3]) - (a[3]) * (p[2]);
+        p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0 + (a[3]) * (p[1]);
+        p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0;
+
+        p[0] = + (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
+        p[1] = - (p[0]) * (a[1]) + (p[1]) * (a[0]) - (p[2]) * (a[3]) + (p[3]) * (a[2]);
+        p[2] = - (p[0]) * (a[2]) + (p[1]) * (a[3]) + (p[2]) * (a[0]) - (p[3]) * (a[1]);
+        p[3] = - (p[0]) * (a[3]) - (p[1]) * (a[2]) + (p[2]) * (a[1]) + (p[3]) * (a[0]);
+
+        return new float[]{p[1], p[2], p[3]};
+    }
+
+    public float[] vectorProduct(float x1, float y1, float z1, float x2, float y2, float z2) {
+        return new float[]{y1 * z2 - y2 * z1, x2 * z1 - x1 * z2, x1 * y2 - x2 * y1};
     }
 }
