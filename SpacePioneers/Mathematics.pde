@@ -44,4 +44,44 @@ static class Mathematics {
     public static float[] vectorProduct(float x1, float y1, float z1, float x2, float y2, float z2) {
         return new float[]{y1 * z2 - y2 * z1, x2 * z1 - x1 * z2, x1 * y2 - x2 * y1};
     }
+
+    public static float[][] convertKeplerianToCartesian(float gConst, float sma, float e, float ap, float lan, float i, float ma, float orbitMass) {
+        float ea, ta, distance, prePositionX, prePositionY, preVelocityX, preVelocityY, positionX, positionY, positionZ, velocityX, velocityY, velocityZ;
+        ea = ma;
+
+        float diff = abs(ma - (ea - e * sin(ea))), lastDiff, lastEA;
+        while(true) {
+            lastEA = ea;
+            lastDiff = diff;
+            ea = ea - (ea - e * sin(ea) - ma) / (1.0 - e * cos(ea));
+            diff = abs(ma - (ea - e * sin(ea)));
+
+            if(diff == 0.0) {
+                break;
+            }
+
+            if(diff > lastDiff) {
+                ea = lastEA;
+                break;
+            }
+        }
+
+        ta = 2.0 * atan2(sqrt(1.0 + e) * sin(ea / 2.0), sqrt(1.0 - e) * cos(ea / 2.0));
+
+        distance = sma * (1.0 - e * cos(ea));
+
+        prePositionX = distance * cos(ta);
+        prePositionY = distance * sin(ta);
+        preVelocityX = sqrt(gConst * sma * orbitMass) / distance * -sin(ea);
+        preVelocityY = sqrt(gConst * sma * orbitMass) / distance * sqrt(1.0 - e * e) * cos(ea);
+
+        positionX = prePositionX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - prePositionY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
+        positionY = prePositionX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - prePositionY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
+        positionZ = prePositionX * (sin(ap) * sin(i)) + prePositionY * (cos(ap) * sin(i));
+        velocityX = preVelocityX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - preVelocityY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
+        velocityY = preVelocityX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - preVelocityY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
+        velocityZ = preVelocityX * (sin(ap) * sin(i)) + preVelocityY * (cos(ap) * sin(i));
+
+        return new float[][]{{positionX, positionY, positionZ}, {velocityX, velocityY, velocityZ}};
+    }
 }

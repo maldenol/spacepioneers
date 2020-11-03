@@ -47,3 +47,9 @@ void setup() {
 void draw() {
     game.draw();
 }
+
+void keyPressed() {
+    if(key == ESC) {
+        key = TAB;
+    }
+}

@@ -73,17 +73,17 @@ class Space {
         float[][] result;
 
         for(int i = 0; i < parents.length; i++) {
-            positionX = parents[i].getFloat("positionX") * this.valuesKoefficient;
-            positionY = parents[i].getFloat("positionY") * this.valuesKoefficient;
-            positionZ = parents[i].getFloat("positionZ") * this.valuesKoefficient;
-            velocityX = parents[i].getFloat("velocityX") * this.valuesKoefficient;
-            velocityY = parents[i].getFloat("velocityY") * this.valuesKoefficient;
-            velocityZ = parents[i].getFloat("velocityZ") * this.valuesKoefficient;
+            positionX = parents[i].getFloat("positionX");
+            positionY = parents[i].getFloat("positionY");
+            positionZ = parents[i].getFloat("positionZ");
+            velocityX = parents[i].getFloat("velocityX");
+            velocityY = parents[i].getFloat("velocityY");
+            velocityZ = parents[i].getFloat("velocityZ");
             angPositionX = radians(new Float(parents[i].getFloat("angPositionX")));
             angPositionY = radians(parents[i].getFloat("angPositionY"));
             angPositionZ = radians(parents[i].getFloat("angPositionZ"));
             angPeriod = parents[i].getFloat("angPeriod");
-            mass = parents[i].getFloat("mass") * this.valuesKoefficient * this.valuesKoefficient;
+            mass = parents[i].getFloat("mass") * this.valuesKoefficient;
             radius = parents[i].getFloat("radius") * this.valuesKoefficient;
 
             parent = parents[i].getParent();
@@ -116,8 +116,15 @@ class Space {
             body.setAnglePeriod(angPeriod);
             body.setTexture(texture);
 
-            if(orbitMass != 0.0) {
-                result = convertKeplerianToCartesian(semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
+            if(orbitMass == 0.0) {
+                positionX *= this.valuesKoefficient;
+                positionY *= this.valuesKoefficient;
+                positionZ *= this.valuesKoefficient;
+                velocityX *= this.valuesKoefficient;
+                velocityY *= this.valuesKoefficient;
+                velocityZ *= this.valuesKoefficient;
+            } else {
+                result = Mathematics.convertKeplerianToCartesian(this.gConst, semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly, orbitMass);
                 positionX = result[0][0];
                 positionY = result[0][1];
                 positionZ = result[0][2];
@@ -154,46 +161,6 @@ class Space {
 
             generateSpace(parents[i].getChildren("body"));
         }
-    }
-
-    public float[][] convertKeplerianToCartesian(float sma, float e, float ap, float lan, float i, float ma, float orbitMass) {
-        float ea, ta, distance, prePositionX, prePositionY, preVelocityX, preVelocityY, positionX, positionY, positionZ, velocityX, velocityY, velocityZ;
-        ea = ma;
-
-        float diff = abs(ma - (ea - e * sin(ea))), lastDiff, lastEA;
-        while(true) {
-            lastEA = ea;
-            lastDiff = diff;
-            ea = ea - (ea - e * sin(ea) - ma) / (1.0 - e * cos(ea));
-            diff = abs(ma - (ea - e * sin(ea)));
-
-            if(diff == 0.0) {
-                break;
-            }
-
-            if(diff > lastDiff) {
-                ea = lastEA;
-                break;
-            }
-        }
-
-        ta = 2.0 * atan2(sqrt(1.0 + e) * sin(ea / 2.0), sqrt(1.0 - e) * cos(ea / 2.0));
-
-        distance = sma * (1.0 - e * cos(ea));
-
-        prePositionX = distance * cos(ta);
-        prePositionY = distance * sin(ta);
-        preVelocityX = sqrt(this.gConst * sma * orbitMass) / distance * -sin(ea);
-        preVelocityY = sqrt(this.gConst * sma * orbitMass) / distance * sqrt(1.0 - e * e) * cos(ea);
-
-        positionX = prePositionX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - prePositionY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
-        positionY = prePositionX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - prePositionY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
-        positionZ = prePositionX * (sin(ap) * sin(i)) + prePositionY * (cos(ap) * sin(i));
-        velocityX = preVelocityX * (cos(ap) * cos(lan) - sin(ap) * cos(i) * sin(lan)) - preVelocityY * (sin(ap) * cos(lan) + cos(ap) * cos(i) * sin(lan));
-        velocityY = preVelocityX * (cos(ap) * sin(lan) + sin(ap) * cos(i) * cos(lan)) - preVelocityY * (sin(ap) * sin(lan) - cos(ap) * cos(i) * cos(lan));
-        velocityZ = preVelocityX * (sin(ap) * sin(i)) + preVelocityY * (cos(ap) * sin(i));
-
-        return new float[][]{{positionX, positionY, positionZ}, {velocityX, velocityY, velocityZ}};
     }
 
     public void tick() {

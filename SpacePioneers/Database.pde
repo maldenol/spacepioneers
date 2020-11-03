@@ -33,6 +33,16 @@ class Database {
     public Database() {
         this.getTextures();
         this.getXMLs();
+
+        File directory;
+        directory = new File("data/textures");
+        directory.mkdirs();
+        directory = new File("data/xmls");
+        directory.mkdirs();
+        directory = new File("data/sounds");
+        directory.mkdirs();
+        directory = new File("data/screenshots");
+        directory.mkdirs();
     }
 
 

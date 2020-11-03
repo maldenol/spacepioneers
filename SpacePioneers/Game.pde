@@ -34,7 +34,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.Iterator;
 
 
 class Game {
@@ -165,6 +164,7 @@ class Game {
         this.keyServer.addKey('+');
         this.keyServer.addKey('/');
         this.keyServer.addKey('*');
+        this.keyServer.addKey(ENTER);
 
         this.xo = this.yo = this.swap = 0;
         this.buffer = new PImage[2];
@@ -573,13 +573,16 @@ class Game {
     private class Telescope {
         private Space.Body body;
 
-        private float speed, angleSpeed, pitchAndYawToRollRatio;
+        private float speed, angleSpeed;
 
         private Interface.KeyServer keyServer;
 
 
         public Telescope(Space.Body body, Interface.KeyServer keyServer) {
             this.body = body;
+
+            this.speed = 1E0;
+            this.angleSpeed = TWO_PI / FPS * 2E-1;
 
             this.keyServer = keyServer;
         }
@@ -615,7 +618,7 @@ class Game {
                 this.body.accelerate(-upX * this.speed, -upY * this.speed, -upZ * this.speed);
             }
             if(this.keyServer.isPressed(UP)) { // pitch up
-                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, this.angleSpeed * this.pitchAndYawToRollRatio);
+                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
                 vector[0] /= vectorLength;
@@ -625,15 +628,15 @@ class Game {
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
+                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
                 vector[0] /= vectorLength;
                 vector[1] /= vectorLength;
                 vector[2] /= vectorLength;
-                upX = vector[0];
-                upY = vector[1];
-                upZ = vector[2];
+                rightX = vector[0];
+                rightY = vector[1];
+                rightZ = vector[2];
 
                 quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
@@ -648,7 +651,40 @@ class Game {
                 this.body.setOrientation(forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ);
             }
             if(this.keyServer.isPressed(DOWN)) { // pitch down
-                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, -this.angleSpeed * this.pitchAndYawToRollRatio);
+                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, this.angleSpeed);
+                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
+                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+                vector[0] /= vectorLength;
+                vector[1] /= vectorLength;
+                vector[2] /= vectorLength;
+                forwardX = vector[0];
+                forwardY = vector[1];
+                forwardZ = vector[2];
+
+                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
+                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+                vector[0] /= vectorLength;
+                vector[1] /= vectorLength;
+                vector[2] /= vectorLength;
+                rightX = vector[0];
+                rightY = vector[1];
+                rightZ = vector[2];
+
+                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
+                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
+                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+                vector[0] /= vectorLength;
+                vector[1] /= vectorLength;
+                vector[2] /= vectorLength;
+                forwardX = vector[0];
+                forwardY = vector[1];
+                forwardZ = vector[2];
+
+                this.body.setOrientation(forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ);
+            }
+            if(this.keyServer.isPressed(RIGHT)) { // yaw right
+                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
                 vector[0] /= vectorLength;
@@ -680,41 +716,8 @@ class Game {
 
                 this.body.setOrientation(forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ);
             }
-            if(this.keyServer.isPressed(RIGHT)) { // yaw right
-                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, this.angleSpeed * this.pitchAndYawToRollRatio);
-                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
-                forwardX = vector[0];
-                forwardY = vector[1];
-                forwardZ = vector[2];
-
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
-                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
-                rightX = vector[0];
-                rightY = vector[1];
-                rightZ = vector[2];
-
-                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
-                vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
-                forwardX = vector[0];
-                forwardY = vector[1];
-                forwardZ = vector[2];
-
-                this.body.setOrientation(forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ);
-            }
             if(this.keyServer.isPressed(LEFT)) { // yaw left
-                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, -this.angleSpeed * this.pitchAndYawToRollRatio);
+                quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
                 vector[0] /= vectorLength;
@@ -724,15 +727,15 @@ class Game {
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
                 vector[0] /= vectorLength;
                 vector[1] /= vectorLength;
                 vector[2] /= vectorLength;
-                rightX = vector[0];
-                rightY = vector[1];
-                rightZ = vector[2];
+                upX = vector[0];
+                upY = vector[1];
+                upZ = vector[2];
 
                 quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
@@ -811,6 +814,9 @@ class Game {
                 upZ = vector[2];
 
                 this.body.setOrientation(forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ);
+            }
+            if(this.keyServer.isClicked(ENTER)) { // take a screenshot
+                saveFrame("data/screenshots/" + System.currentTimeMillis() + ".png");
             }
         }
     }

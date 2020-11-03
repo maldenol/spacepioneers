@@ -31,6 +31,8 @@
 import java.awt.Robot;
 import java.awt.AWTException;
 
+import java.util.Iterator;
+
 
 class Interface {
     private class ButtonServer {
@@ -465,17 +467,29 @@ class Interface {
 
         public void begin() {
             float[] bodyPosition = this.relativeBody.getPosition();
-            float r = this.relativeDistance * this.relativeBody.getRadius();
+            float r = this.relativeBody.getRadius();
+            float[] orientation = this.relativeBody.getOrientation();
+            orientation[0] *= r;
+            orientation[1] *= r;
+            orientation[2] *= r;
+            r *= this.relativeDistance;
+
             beginCamera();
             switch(this.viewingMode) {
-                case 0:
+                case 0: // free
                     camera(this.positionX, this.positionY, this.positionZ, this.positionX + this.forwardX, this.positionY + this.forwardY, this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
                     break;
-                case 1:
+                case 1: // free relative to the body
                     camera(bodyPosition[0] + this.positionX, bodyPosition[1] + this.positionY, bodyPosition[2] + this.positionZ, bodyPosition[0] + this.positionX + this.forwardX, bodyPosition[1] + this.positionY + this.forwardY, bodyPosition[2] + this.positionZ + this.forwardZ, this.upX, this.upY, this.upZ);
                     break;
-                case 2:
+                case 2: // around the body
                     camera(bodyPosition[0] - r * this.forwardX, bodyPosition[1] - r * this.forwardY, bodyPosition[2] - r * this.forwardZ, bodyPosition[0], bodyPosition[1], bodyPosition[2], this.upX, this.upY, this.upZ);
+                    break;
+                case 3: // fixed body view from 1st person
+                    camera(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2], bodyPosition[0] + orientation[0] * 2, bodyPosition[1] + orientation[1] * 2, bodyPosition[2] + orientation[2] * 2, orientation[6], orientation[7], orientation[8]);
+                    break;
+                case 4: // free body view from 1st person
+                    camera(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2], bodyPosition[0] + orientation[0] + this.forwardX, bodyPosition[1] + orientation[1] + this.forwardY, bodyPosition[2] + orientation[2] + this.forwardZ, this.upX, this.upY, this.upZ);
                     break;
             }
 
@@ -488,27 +502,42 @@ class Interface {
             this.begin();
 
             float[] bodyPosition = this.relativeBody.getPosition();
-            float r = this.relativeBody.getRadius() * this.relativeDistance;
+            float r = this.relativeBody.getRadius();
+            float[] orientation = this.relativeBody.getOrientation();
+            orientation[0] *= r;
+            orientation[1] *= r;
+            orientation[2] *= r;
+            r *= this.relativeDistance;
 
             if(this.relativeBody == null) {
                 this.viewingMode = 0;
             }
 
             switch(this.viewingMode) {
-                case 0:
+                case 0: // free
                     translate(this.positionX, this.positionY, this.positionZ);
                     shape(skybox, 0, 0);
                     translate(-this.positionX, -this.positionY, -this.positionZ);
                     break;
-                case 1:
+                case 1: // free relative to the body
                     translate(bodyPosition[0] + this.positionX, bodyPosition[1] + this.positionY, bodyPosition[2] + this.positionZ);
                     shape(skybox, 0, 0);
                     translate(-(bodyPosition[0] + this.positionX), -(bodyPosition[1] + this.positionY), -(bodyPosition[2] + this.positionZ));
                     break;
-                case 2:
+                case 2: // around the body
                     translate(bodyPosition[0] - r * this.forwardX, bodyPosition[1] - r * this.forwardY, bodyPosition[2] - r * this.forwardZ);
                     shape(skybox, 0, 0);
                     translate(-(bodyPosition[0] - r * this.forwardX), -(bodyPosition[1] - r * this.forwardY), -(bodyPosition[2] - r * this.forwardZ));
+                    break;
+                case 3: // fixed body view from 1st person
+                    translate(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2]);
+                    shape(skybox, 0, 0);
+                    translate(-(bodyPosition[0] + orientation[0]), -(bodyPosition[1] + orientation[1]), -(bodyPosition[2] + orientation[2]));
+                    break;
+                case 4: // free body view from 1st person
+                    translate(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2]);
+                    shape(skybox, 0, 0);
+                    translate(-(bodyPosition[0] + orientation[0]), -(bodyPosition[1] + orientation[1]), -(bodyPosition[2] + orientation[2]));
                     break;
             }
         }
@@ -710,7 +739,7 @@ class Interface {
                     this.zoom = this.zoomMin;
                 }
             }
-            if(this.keyServer.isPressed('2')) { // normal zoom
+            if(this.keyServer.isPressed('2')) { // default zoom
                 this.zoom = this.zoomInit;
             }
             if(this.keyServer.isPressed('3')) { // zoom in
@@ -727,7 +756,7 @@ class Interface {
                     }
                 }
             }
-            if(this.keyServer.isPressed('5')) { // normal relative distance
+            if(this.keyServer.isPressed('5')) { // default relative distance
                 if(this.viewingMode != 0) {
                     this.relativeDistance = this.relativeDistanceInit;
                 }
@@ -740,40 +769,62 @@ class Interface {
                     }
                 }
             }
-            if(this.keyServer.isPressed('7')) { // absolute viewing mode
+            if(this.keyServer.isClicked('7')) { // previous viewing mode
                 float[] bodyPosition = this.relativeBody.getPosition();
                 float r = this.relativeDistance * this.relativeBody.getRadius();
-                if(this.viewingMode == 1) {
-                    this.positionX += bodyPosition[0];
-                    this.positionY += bodyPosition[1];
-                    this.positionZ += bodyPosition[2];
+
+                this.viewingMode = (this.viewingMode - 1 + 5) % 5;
+
+                switch(this.viewingMode) {
+                    case 0:
+                        this.positionX += bodyPosition[0];
+                        this.positionY += bodyPosition[1];
+                        this.positionZ += bodyPosition[2];
+                        break;
+                    case 1:
+                        this.positionX = -r * this.forwardX;
+                        this.positionY = -r * this.forwardY;
+                        this.positionZ = -r * this.forwardZ;
+                        break;
                 }
-                if(this.viewingMode == 2) {
-                    this.positionX = bodyPosition[0] - r * this.forwardX;
-                    this.positionY = bodyPosition[1] - r * this.forwardY;
-                    this.positionZ = bodyPosition[2] - r * this.forwardZ;
+            }
+            if(this.keyServer.isClicked('8')) { // default viewing mode
+                float[] bodyPosition = this.relativeBody.getPosition();
+                float r = this.relativeDistance * this.relativeBody.getRadius();
+
+                switch(this.viewingMode) {
+                    case 1:
+                        this.positionX += bodyPosition[0];
+                        this.positionY += bodyPosition[1];
+                        this.positionZ += bodyPosition[2];
+                        break;
+                    case 2:
+                        this.positionX = bodyPosition[0] - r * this.forwardX;
+                        this.positionY = bodyPosition[1] - r * this.forwardY;
+                        this.positionZ = bodyPosition[2] - r * this.forwardZ;
+                        break;
                 }
 
                 this.viewingMode = 0;
             }
-            if(this.keyServer.isPressed('8')) { // absolute-relative viewing mode
+            if(this.keyServer.isClicked('9')) { // next viewing mode
                 float[] bodyPosition = this.relativeBody.getPosition();
                 float r = this.relativeDistance * this.relativeBody.getRadius();
-                if(this.viewingMode == 0) {
-                    this.positionX -= bodyPosition[0];
-                    this.positionY -= bodyPosition[1];
-                    this.positionZ -= bodyPosition[2];
-                }
-                if(this.viewingMode == 2) {
-                    this.positionX = -r * this.forwardX;
-                    this.positionY = -r * this.forwardY;
-                    this.positionZ = -r * this.forwardZ;
-                }
 
-                this.viewingMode = 1;
-            }
-            if(this.keyServer.isPressed('9')) { // relative viewing mode
-                this.viewingMode = 2;
+                this.viewingMode = (this.viewingMode + 1) % 5;
+
+                switch(this.viewingMode) {
+                    case 1:
+                        this.positionX -= bodyPosition[0];
+                        this.positionY -= bodyPosition[1];
+                        this.positionZ -= bodyPosition[2];
+                        break;
+                    case 2:
+                        this.positionX = bodyPosition[0] - r * this.forwardX;
+                        this.positionY = bodyPosition[1] - r * this.forwardY;
+                        this.positionZ = bodyPosition[2] - r * this.forwardZ;
+                        break;
+                }
             }
             if(this.keyServer.isPressed('-')) { // 5 degree of freedom
                 this.dof5or6 = false;
