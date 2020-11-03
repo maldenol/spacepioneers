@@ -18,7 +18,7 @@
 /***
   "Space Pioneers"
   Space class
-      Body class
+      Body class extends Physics.SphericalBody
   Malovanyi Denys Olehovych
 ***/
 
@@ -197,7 +197,9 @@ class Space {
     }
 
     public void tick() {
-        PVector force;
+        float[] force;
+        float mass1, mass2;
+
         Iterator<Body> iter = bodies.iterator();
         while(iter.hasNext()) {
             Body obj1 = iter.next();
@@ -212,11 +214,13 @@ class Space {
 
                     if(this.isCollide(obj1, obj2)) {
                         this.collide(obj1, obj2);
+                    } else {
+                        force = this.gForce(obj1, obj2);
+                        mass1 = obj1.getMass();
+                        mass2 = obj2.getMass();
+                        obj1.accelerate(force[0] / mass1, force[1] / mass1, force[2] / mass1);
+                        obj2.accelerate(-force[0] / mass2, -force[1] / mass2, -force[2] / mass2);
                     }
-
-                    force = this.gForce(obj1, obj2);
-                    obj1.accelerate(force.div(obj1.getMass()));
-                    obj2.accelerate(force.div(obj2.getMass()));
                 }
 
                 obj1.tick();
@@ -229,12 +233,11 @@ class Space {
     }
 
     public boolean isCollide(Body obj1, Body obj2) {
-        PVector position1 = obj1.getPosition();
-        PVector position2 = obj2.getPosition();
+        float[] position1 = obj1.getPosition(), position2 = obj2.getPosition();
 
-        float x = position1.x - position2.x;
-        float y = position1.y - position2.y;
-        float z = position1.z - position2.z;
+        float x = position1[0] - position2[0];
+        float y = position1[1] - position2[1];
+        float z = position1[2] - position2[2];
 
         float distance = obj1.getRadius() + obj2.getRadius();
 
@@ -245,48 +248,58 @@ class Space {
     }
 
     public void collide(Body obj1, Body obj2) {
-        PVector vector = new PVector(0, 0, 0);
-        float mass1 = obj1.getMass();
-        float mass2 = obj2.getMass();
-        PVector velocity1 = obj1.getVelocity().mult(mass1);
-        PVector velocity2 = obj2.getVelocity().mult(mass2);
+        float[] vector = new float[]{0.0, 0.0, 0.0};
+        float mass1 = obj1.getMass(), mass2 = obj2.getMass();
+        float[] vector1 = obj1.getVelocity(), vector2 = obj2.getVelocity();
+        vector1[0] *= mass1;
+        vector1[1] *= mass1;
+        vector1[2] *= mass1;
+        vector2[0] *= mass2;
+        vector2[1] *= mass2;
+        vector2[2] *= mass2;
 
         float volume = (pow(obj1.getRadius(), 3) + pow(obj2.getRadius(), 3)) * 4.0 / 3.0 * PI;
         float radius = pow(volume * 3.0 / 4.0 / PI, 1.0 / 3.0);
+        float mass = mass1 + mass2;
 
-        vector.add(velocity1);
-        vector.add(velocity2);
-        vector.div(mass1 + mass2);
+        vector[0] = (vector1[0] + vector2[0]) / mass;
+        vector[1] = (vector1[1] + vector2[1]) / mass;
+        vector[2] = (vector1[2] + vector2[2]) / mass;
 
         if(mass1 >= mass2) {
-            obj1.setVelocity(vector);
+            obj1.setVelocity(vector[0], vector[1], vector[2]);
             obj1.setRadius(radius);
             obj2.delete();
         } else {
-            obj2.setVelocity(vector);
+            obj2.setVelocity(vector[0], vector[1], vector[2]);
             obj2.setRadius(radius);
             obj1.delete();
         }
     }
 
-    private PVector gForce(Body obj1, Body obj2) {
+    private float[] gForce(Body obj1, Body obj2) {
         float mass1 = obj1.getMass();
         float mass2 = obj2.getMass();
-        PVector position1 = obj1.getPosition();
-        PVector position2 = obj2.getPosition();
+        float[] position1 = obj1.getPosition();
+        float[] position2 = obj2.getPosition();
 
-        float squaredDistance = pow(position1.x - position2.x, 2) + pow(position1.y - position2.y, 2) + pow(position1.z - position2.z, 2);
-        PVector force = new PVector(position2.x - position1.x, position2.y - position1.y, position2.z - position1.z);
+        float squaredDistance = pow(position1[0] - position2[0], 2) + pow(position1[1] - position2[1], 2) + pow(position1[2] - position2[2], 2);
+        float[] force = new float[]{position2[0] - position1[0], position2[1] - position1[1], position2[2] - position1[2]};
         float scalar = mass1 * mass2 / squaredDistance * this.gConst;
+        float vectorLength = sqrt(force[0] * force[0] + force[1] * force[1] + force[2] * force[2]);
 
-        force.normalize();
-        force.mult(scalar);
+        force[0] /= vectorLength;
+        force[1] /= vectorLength;
+        force[2] /= vectorLength;
+        force[0] *= scalar;
+        force[1] *= scalar;
+        force[2] *= scalar;
 
         return force;
     }
 
     public void draw() {
-        PVector position;
+        float[] position;
         float[] angle;
         PShape pshape;
 
@@ -296,7 +309,7 @@ class Space {
             position = item.getPosition();
             angle = item.getAnglePosition();
 
-            translate(position.x, position.y, position.z);
+            translate(position[0], position[1], position[2]);
 
             pshape = createShape(SPHERE, item.getRadius());
             pshape.setTexture(item.getTexture());
@@ -305,7 +318,7 @@ class Space {
             pshape.rotateY(angle[2]);
             shape(pshape, 0, 0);
 
-            translate(-position.x, -position.y, -position.z);
+            translate(-position[0], -position[1], -position[2]);
         }
     }
 
@@ -318,67 +331,22 @@ class Space {
     }
 
 
-    public class Body {
-        private PVector position, velocity;
-        private float mass;
-        private float radius;
+    public class Body extends Physics.SphericalBody {
         private float anglePositionX, anglePositionY, anglePositionZ, angleVelocityY;
         private PImage texture;
         private boolean deleted;
 
 
         public Body(float positionX, float positionY, float positionZ, float mass, float radius) {
-            this.position = new PVector(positionX, positionY, positionZ);
-            this.velocity = new PVector(0, 0, 0);
-            this.mass = mass;
-            this.radius = radius;
+            super(positionX, positionY, positionZ, mass, radius);
+
             this.anglePositionX = 0;
             this.anglePositionY = 0;
             this.angleVelocityY = 0;
             this.deleted = false;
-            this.texture = get();
+            this.texture = null;
         }
 
-
-        public void setPosition(PVector position) {
-            this.position = position.copy();
-        }
-
-        public void setPosition(float positionX, float positionY, float positionZ) {
-            this.position = new PVector(positionX, positionY, positionZ);
-        }
-
-        public PVector getPosition() {
-            return this.position.copy();
-        }
-
-        public void setVelocity(PVector velocity) {
-            this.velocity = velocity.copy();
-        }
-
-        public void setVelocity(float velocityX, float velocityY, float velocityZ) {
-            this.velocity = new PVector(velocityX, velocityY, velocityZ);
-        }
-
-        public PVector getVelocity() {
-            return this.velocity.copy();
-        }
-
-        public void setMass(float mass) {
-            this.mass = mass;
-        }
-
-        public float getMass() {
-            return this.mass;
-        }
-
-        public void setRadius(float radius) {
-            this.radius = radius;
-        }
-
-        public float getRadius() {
-            return this.radius;
-        }
 
         public void setAnglePosition(float anglePositionX, float anglePositionY, float anglePositionZ) {
             this.anglePositionX = anglePositionX;
@@ -410,17 +378,8 @@ class Space {
             return this.texture.copy();
         }
 
-        public void accelerate(PVector velocity) {
-            this.velocity.add(velocity);
-        }
-
         public void accelerateAng(float angleVelocity) {
             this.angleVelocityY += angleVelocity;
-        }
-
-        public void tick() {
-            this.position.add(this.velocity);
-            this.anglePositionY = (this.anglePositionY + this.angleVelocityY) % TWO_PI;
         }
 
         public void delete() {
@@ -429,6 +388,14 @@ class Space {
 
         public boolean isDeleted() {
             return this.deleted;
+        }
+
+        @Override
+        public void tick() {
+            super.positionX += super.velocityX;
+            super.positionY += super.velocityY;
+            super.positionZ += super.velocityZ;
+            this.anglePositionY = (this.anglePositionY + this.angleVelocityY) % TWO_PI;
         }
     }
 }

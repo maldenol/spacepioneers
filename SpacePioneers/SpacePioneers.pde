@@ -26,7 +26,7 @@
 int FPS;
 float HALF_WIDTH, HALF_HEIGHT;
 
-Interface iface;
+Game game;
 
 
 void settings() {
@@ -41,9 +41,9 @@ void setup() {
     frameRate(FPS);
     noCursor();
 
-    iface = new Interface();
+    game = new Game();
 }
 
 void draw() {
-    iface.draw();
+    game.draw();
 }
