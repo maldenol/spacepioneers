@@ -18,6 +18,7 @@
 /***
   "Space Pioneers"
   Mathematics static class
+      Vector static class
   Malovanyi Denys Olehovych
 ***/
 

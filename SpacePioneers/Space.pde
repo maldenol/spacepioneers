@@ -28,7 +28,7 @@ import java.util.Iterator;
 
 
 class Space {
-    private float gConst, detailMode, valuesKoefficient;
+    private float gConst, detailMode, valuesKoefficient, backlight;
     private ArrayList<Body> bodies;
     private PImage skybox;
     private Body telescope;
@@ -55,6 +55,7 @@ class Space {
         this.skybox = this.db.getTexture(database.getString("skybox"));
         this.skybox.resize((int)(this.skybox.width * this.detailMode), 0);
         this.valuesKoefficient = database.getFloat("valuesKoefficient");
+        this.backlight = database.getFloat("backlight");
 
         parents = database.getChildren("body");
         parents = parents[0].getChildren("body");
@@ -63,7 +64,8 @@ class Space {
     }
 
     private void generateSpace(XML[] parents) {
-        float positionX, positionY, positionZ, velocityX, velocityY, velocityZ, angPositionX, angPositionY, angPositionZ, angPeriod, mass, radius, brightness;
+        float positionX, positionY, positionZ, velocityX, velocityY, velocityZ, angPositionX, angPositionY, angPositionZ, angPeriod, mass, radius;
+        int bright;
         float orbitMass, orbitPositionX, orbitPositionY, orbitPositionZ, orbitVelocityX, orbitVelocityY, orbitVelocityZ;
         float semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly;
         String name;
@@ -85,7 +87,7 @@ class Space {
             angPeriod = parents[i].getFloat("angPeriod");
             mass = parents[i].getFloat("mass") * this.valuesKoefficient;
             radius = parents[i].getFloat("radius") * this.valuesKoefficient;
-            brightness = parents[i].getFloat("brightness");
+            bright = parents[i].getInt("bright");
 
             parent = parents[i].getParent();
             orbitMass = parent.getFloat("mass");
@@ -114,7 +116,7 @@ class Space {
             body.setVelocity(velocityX, velocityY, velocityZ);
             body.setAnglePosition(angPositionX, angPositionY, angPositionZ);
             body.setAnglePeriod(angPeriod);
-            body.setBrightness(brightness);
+            body.setBright(bright == 1);
             body.setTexture(texture);
 
             if(orbitMass == 0.0) {
@@ -270,13 +272,12 @@ class Space {
         float[] position;
         float[] orientation;
         float[] angle;
-        float brightness;
         ArrayList<Float[]> lightsPositions = new ArrayList<Float[]>();
         float[] lightPosition;
         PShape pshape;
 
         for(Body body : this.bodies) {
-            if(body.getBrightness() == 255.0) {
+            if(body.getBright()) {
                 lightPosition = body.getPosition();
                 lightsPositions.add(new Float[]{lightPosition[0], lightPosition[1], lightPosition[2]});
             }
@@ -287,13 +288,15 @@ class Space {
         for(Body body : this.bodies) {
             position = body.getPosition();
             angle = body.getAnglePosition();
-            brightness = body.getBrightness();
 
             lightFalloff(1.0, 0.0, 0.0);
-            ambientLight(brightness, brightness, brightness);
-            directionalLight(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-            for(Float[] innerLightPosition : lightsPositions) {
-                pointLight(255, 255, 255, innerLightPosition[0], innerLightPosition[1], innerLightPosition[2]);
+            if(body.getBright()) {
+                ambientLight(255.0, 255.0, 255.0);
+            } else {
+                ambientLight(this.backlight, this.backlight, this.backlight);
+                for(Float[] innerLightPosition : lightsPositions) {
+                    pointLight(255.0, 255.0, 255.0, innerLightPosition[0], innerLightPosition[1], innerLightPosition[2]);
+                }
             }
 
             translate(position[0], position[1], position[2]);
@@ -323,7 +326,7 @@ class Space {
 
     public class Body extends Physics.SphericalBody {
         private float anglePositionX, anglePositionY, anglePositionZ, angleVelocityY;
-        private float brightness;
+        private boolean bright;
         private PImage texture;
         private boolean deleted;
 
@@ -334,7 +337,7 @@ class Space {
             this.anglePositionX = 0.0;
             this.anglePositionY = 0.0;
             this.angleVelocityY = 0.0;
-            this.brightness = 0.0;
+            this.bright = false;
             this.texture = null;
             this.deleted = false;
         }
@@ -362,12 +365,12 @@ class Space {
             return TWO_PI / this.angleVelocityY;
         }
 
-        public void setBrightness(float brightness) {
-            this.brightness = brightness;
+        public void setBright(boolean bright) {
+            this.bright = bright;
         }
 
-        public float getBrightness() {
-            return this.brightness;
+        public boolean getBright() {
+            return this.bright;
         }
 
         public void setTexture(PImage texture) {
