@@ -24,6 +24,7 @@
 
 
 import java.io.File;
+import java.nio.file.Paths;
 
 
 class Database {
@@ -35,13 +36,13 @@ class Database {
         this.getXMLs();
 
         File directory;
-        directory = new File("data/textures");
+        directory = new File(sketchPath() + "/data/textures");
         directory.mkdirs();
-        directory = new File("data/xmls");
+        directory = new File(sketchPath() + "/data/xmls");
         directory.mkdirs();
-        directory = new File("data/sounds");
+        directory = new File(sketchPath() + "/data/sounds");
         directory.mkdirs();
-        directory = new File("data/screenshots");
+        directory = new File(sketchPath() + "/data/screenshots");
         directory.mkdirs();
     }
 

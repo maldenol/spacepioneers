@@ -50,6 +50,6 @@ void draw() {
 
 void keyPressed() {
     if(key == ESC) {
-        key = TAB;
+        key = '`';
     }
 }

@@ -25,13 +25,13 @@
 
 static class Mathematics {
     public static float[] rotateOnQuaternion(float px, float py, float pz, float ax, float ay, float az, float angle) {
-        float[] p = new float[]{0, px, py, pz};
+        float[] p = new float[]{0.0, px, py, pz};
         float[] a = new float[]{cos(angle), sin(angle) * ax, sin(angle) * ay, sin(angle) * az};
 
-        p[0] = 0 - (a[1]) * (p[1]) - (a[2]) * (p[2]) - (a[3]) * (p[3]);
-        p[1] = (a[0]) * (p[1]) + 0 + (a[2]) * (p[3]) - (a[3]) * (p[2]);
-        p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0 + (a[3]) * (p[1]);
-        p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0;
+        p[0] = 0.0 - (a[1]) * (p[1]) - (a[2]) * (p[2]) - (a[3]) * (p[3]);
+        p[1] = (a[0]) * (p[1]) + 0.0 + (a[2]) * (p[3]) - (a[3]) * (p[2]);
+        p[2] = (a[0]) * (p[2]) - (a[1]) * (p[3]) + 0.0 + (a[3]) * (p[1]);
+        p[3] = (a[0]) * (p[3]) + (a[1]) * (p[2]) - (a[2]) * (p[1]) + 0.0;
 
         p[0] = + (p[0]) * (a[0]) + (p[1]) * (a[1]) + (p[2]) * (a[2]) + (p[3]) * (a[3]);
         p[1] = - (p[0]) * (a[1]) + (p[1]) * (a[0]) - (p[2]) * (a[3]) + (p[3]) * (a[2]);
@@ -39,10 +39,6 @@ static class Mathematics {
         p[3] = - (p[0]) * (a[3]) - (p[1]) * (a[2]) + (p[2]) * (a[1]) + (p[3]) * (a[0]);
 
         return new float[]{p[1], p[2], p[3]};
-    }
-
-    public static float[] vectorProduct(float x1, float y1, float z1, float x2, float y2, float z2) {
-        return new float[]{y1 * z2 - y2 * z1, x2 * z1 - x1 * z2, x1 * y2 - x2 * y1};
     }
 
     public static float[][] convertKeplerianToCartesian(float gConst, float sma, float e, float ap, float lan, float i, float ma, float orbitMass) {
@@ -83,5 +79,56 @@ static class Mathematics {
         velocityZ = preVelocityX * (sin(ap) * sin(i)) + preVelocityY * (cos(ap) * sin(i));
 
         return new float[][]{{positionX, positionY, positionZ}, {velocityX, velocityY, velocityZ}};
+    }
+
+
+    public static class Vector {
+        public static float[] add(float ax, float ay, float az, float bx, float by, float bz) {
+            return new float[]{ax + bx, ay + by, az + bz};
+        }
+
+        public static float[] subtract(float ax, float ay, float az, float bx, float by, float bz) {
+            return add(-ax, -ay, -az, -bx, -by, -bz);
+        }
+
+        public static float[] multiply(float x, float y, float z, float s) {
+            return new float[]{x * s, y * s, z * s};
+        }
+
+        public static float[] divide(float x, float y, float z, float s) {
+            return new float[]{x / s, y / s, z / s};
+        }
+
+        public static float length(float x, float y, float z) {
+            return sqrt(x * x + y * y + z * z);
+        }
+
+        public static float[] normalize(float x, float y, float z) {
+            float l = length(x, y, z);
+            return new float[]{x / l, y / l, z / l};
+        }
+
+        public static float scalarProduct(float ax, float ay, float az, float bx, float by, float bz) {
+            return ax * bx + ay * by + az * bz;
+        }
+
+        public static float[] vectorProduct(float ax, float ay, float az, float bx, float by, float bz) {
+            return new float[]{ay * bz - by * az, bx * az - ax * bz, ax * by - bx * ay};
+        }
+
+        public static float angle180(float ax, float ay, float az, float bx, float by, float bz) {
+            return acos(scalarProduct(ax, ay, az, bx, by, bz) / length(ax, ay, az) / length(bx, by, bz));
+        }
+
+        public static float angle360(float ax, float ay, float az, float bx, float by, float bz) {
+            float dot = scalarProduct(ax, ay, az, bx, by, bz);
+            float[] product = vectorProduct(ax, ay, az, bx, by, bz);
+            float det = length(product[0], product[1], product[2]);
+            return atan2(det, dot);
+        }
+
+        public static float angle(float ax, float ay, float az, float bx, float by, float bz) {
+            return angle180(ax, ay, az, bx, by, bz);
+        }
     }
 }

@@ -87,9 +87,9 @@ class Interface {
 
                 if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     button.activate();
-                    for(Button b : this.buttons.get(context)) {
-                        if(b != button) {
-                            b.deactivate();
+                    for(Button innerButton : this.buttons.get(context)) {
+                        if(innerButton != button) {
+                            innerButton.deactivate();
                         }
                     }
                     this.timeLastPress = millis();
@@ -110,9 +110,9 @@ class Interface {
 
                 if(field.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                     field.activate();
-                    for(Button f : this.fields.get(context)) {
-                        if(f != field) {
-                            f.deactivate();
+                    for(Button innerField : this.fields.get(context)) {
+                        if(innerField != field) {
+                            innerField.deactivate();
                         }
                     }
                     this.timeLastPress = millis();
@@ -135,15 +135,15 @@ class Interface {
                 }
             }
 
-            for(Button[] buttonList : this.buttonsLists.get(context)) {
-                for(Button button : buttonList) {
+            for(Button[] buttonsList : this.buttonsLists.get(context)) {
+                for(Button button : buttonsList) {
                     button.draw();
 
                     if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
                         button.activate();
-                        for(Button e : buttonList) {
-                            if(e != button) {
-                                e.deactivate();
+                        for(Button innerButton : buttonsList) {
+                            if(innerButton != button) {
+                                innerButton.deactivate();
                             }
                         }
                         this.timeLastPress = millis();
@@ -151,40 +151,40 @@ class Interface {
                 }
             }
 
-            for(Button[] flagList : this.flagsLists.get(context)) {
-                for(Button button : flagList) {
-                    button.draw();
+            for(Button[] flagsList : this.flagsLists.get(context)) {
+                for(Button flag : flagsList) {
+                    flag.draw();
 
-                    if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                        button.toggle();
+                    if(flag.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        flag.toggle();
                         this.timeLastPress = millis();
                     }
                 }
             }
 
-            for(Button[] fieldList : this.fieldsLists.get(context)) {
-                for(Button button : fieldList) {
-                    button.draw();
+            for(Button[] fieldsList : this.fieldsLists.get(context)) {
+                for(Button field : fieldsList) {
+                    field.draw();
 
-                    if(button.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
-                        button.activate();
-                        for(Button[] fL : this.fieldsLists.get(context)) {
-                            for(Button e : fL) {
-                                if(e != button) {
-                                    e.deactivate();
+                    if(field.isPressed() && millis() - this.timeLastPress >= this.timeBetweenPresses) {
+                        field.activate();
+                        for(Button[] innerFieldsList : this.fieldsLists.get(context)) {
+                            for(Button innerField : innerFieldsList) {
+                                if(innerField != field) {
+                                    innerField.deactivate();
                                 }
                             }
                         }
                         this.timeLastPress = millis();
                     }
 
-                    if(button.isActive()) {
+                    if(field.isActive()) {
                         if(keyPressed) {
                             if(!this.fieldPressed || this.fieldLastChar != key) {
                                 if(keyCode == BACKSPACE) {
-                                    button.pop();
+                                    field.pop();
                                 } else if(key != CODED) {
-                                    button.push(key);
+                                    field.push(key);
                                 }
                                 this.fieldLastChar = key;
                             }
@@ -217,14 +217,14 @@ class Interface {
             }
 
             for(Button[] flagsList : this.flagsLists.get(context)) {
-                for(Button button : flagsList) {
-                    button.deactivate();
+                for(Button flag : flagsList) {
+                    flag.deactivate();
                 }
             }
 
             for(Button[] fieldsList : this.fieldsLists.get(context)) {
-                for(Button button : fieldsList) {
-                    button.deactivate();
+                for(Button field : fieldsList) {
+                    field.deactivate();
                 }
             }
         }
@@ -486,7 +486,7 @@ class Interface {
                     camera(bodyPosition[0] - r * this.forwardX, bodyPosition[1] - r * this.forwardY, bodyPosition[2] - r * this.forwardZ, bodyPosition[0], bodyPosition[1], bodyPosition[2], this.upX, this.upY, this.upZ);
                     break;
                 case 3: // fixed body view from 1st person
-                    camera(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2], bodyPosition[0] + orientation[0] * 2, bodyPosition[1] + orientation[1] * 2, bodyPosition[2] + orientation[2] * 2, orientation[6], orientation[7], orientation[8]);
+                    camera(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2], bodyPosition[0] + orientation[0] * 2.0, bodyPosition[1] + orientation[1] * 2.0, bodyPosition[2] + orientation[2] * 2.0, orientation[6], orientation[7], orientation[8]);
                     break;
                 case 4: // free body view from 1st person
                     camera(bodyPosition[0] + orientation[0], bodyPosition[1] + orientation[1], bodyPosition[2] + orientation[2], bodyPosition[0] + orientation[0] + this.forwardX, bodyPosition[1] + orientation[1] + this.forwardY, bodyPosition[2] + orientation[2] + this.forwardZ, this.upX, this.upY, this.upZ);
@@ -555,30 +555,21 @@ class Interface {
                 if(mouseX != pmouseX) { // yaw
                     quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
 
-                    quaternion = Mathematics.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                    quaternion = Mathematics.Vector.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.rightX = vector[0];
                     this.rightY = vector[1];
                     this.rightZ = vector[2];
 
-                    quaternion = Mathematics.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                    quaternion = Mathematics.Vector.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
@@ -586,30 +577,21 @@ class Interface {
                 if(mouseY != pmouseY) { // pitch
                     quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
 
-                    quaternion = Mathematics.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                    quaternion = Mathematics.Vector.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.upX = vector[0];
                     this.upY = vector[1];
                     this.upZ = vector[2];
 
-                    quaternion = Mathematics.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
+                    quaternion = Mathematics.Vector.vectorProduct(this.rightX, this.rightY, this.rightZ, this.upX, this.upY, this.upZ);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
@@ -618,10 +600,7 @@ class Interface {
                 if(mouseX != pmouseX) { // rotate left or right
                     quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
@@ -629,10 +608,7 @@ class Interface {
                 if(mouseY != pmouseY) { // rotate up or down
                     quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                    vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                    vector[0] /= vectorLength;
-                    vector[1] /= vectorLength;
-                    vector[2] /= vectorLength;
+                    vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
                     this.forwardY = vector[1];
                     this.forwardZ = vector[2];
@@ -674,30 +650,21 @@ class Interface {
             if(this.keyServer.isPressed('q')) { // roll counterclockwise
                 quaternion = Mathematics.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.upX = vector[0];
                 this.upY = vector[1];
                 this.upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.rightX = vector[0];
                 this.rightY = vector[1];
                 this.rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.upX = vector[0];
                 this.upY = vector[1];
                 this.upZ = vector[2];
@@ -705,30 +672,21 @@ class Interface {
             if(this.keyServer.isPressed('e')) { // roll clockwise
                 quaternion = Mathematics.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.upX = vector[0];
                 this.upY = vector[1];
                 this.upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.rightX = vector[0];
                 this.rightY = vector[1];
                 this.rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 this.upX = vector[0];
                 this.upY = vector[1];
                 this.upZ = vector[2];

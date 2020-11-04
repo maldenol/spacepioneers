@@ -37,9 +37,9 @@ static class Physics {
             this.positionX = positionX;
             this.positionY = positionY;
             this.positionZ = positionZ;
-            this.velocityX = 0;
-            this.velocityY = 0;
-            this.velocityZ = 0;
+            this.velocityX = 0.0;
+            this.velocityY = 0.0;
+            this.velocityZ = 0.0;
             this.mass = mass;
             this.radius = radius;
             this.positionX = this.positionY = this.positionZ = 0.0;

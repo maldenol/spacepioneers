@@ -63,7 +63,7 @@ class Space {
     }
 
     private void generateSpace(XML[] parents) {
-        float positionX, positionY, positionZ, velocityX, velocityY, velocityZ, angPositionX, angPositionY, angPositionZ, angPeriod, mass, radius;
+        float positionX, positionY, positionZ, velocityX, velocityY, velocityZ, angPositionX, angPositionY, angPositionZ, angPeriod, mass, radius, brightness;
         float orbitMass, orbitPositionX, orbitPositionY, orbitPositionZ, orbitVelocityX, orbitVelocityY, orbitVelocityZ;
         float semiMajorAxis, eccentricity, argumentOfPeriapsis, longitudeOfAscendingNode, inclination, meanAnomaly;
         String name;
@@ -85,6 +85,7 @@ class Space {
             angPeriod = parents[i].getFloat("angPeriod");
             mass = parents[i].getFloat("mass") * this.valuesKoefficient;
             radius = parents[i].getFloat("radius") * this.valuesKoefficient;
+            brightness = parents[i].getFloat("brightness");
 
             parent = parents[i].getParent();
             orbitMass = parent.getFloat("mass");
@@ -111,9 +112,9 @@ class Space {
             Body body = new Body(positionX, positionY, positionZ, mass, radius);
 
             body.setVelocity(velocityX, velocityY, velocityZ);
-
             body.setAnglePosition(angPositionX, angPositionY, angPositionZ);
             body.setAnglePeriod(angPeriod);
+            body.setBrightness(brightness);
             body.setTexture(texture);
 
             if(orbitMass == 0.0) {
@@ -169,28 +170,28 @@ class Space {
 
         Iterator<Body> iter = bodies.iterator();
         while(iter.hasNext()) {
-            Body obj1 = iter.next();
+            Body body1 = iter.next();
 
-            if(obj1.isDeleted()) {
+            if(body1.isDeleted()) {
                 iter.remove();
             } else {
-                for(Body obj2 : this.bodies) {
-                    if(obj1 == obj2) {
+                for(Body body2 : this.bodies) {
+                    if(body1 == body2) {
                         continue;
                     }
 
-                    if(this.isCollide(obj1, obj2)) {
-                        this.collide(obj1, obj2);
+                    if(this.isCollide(body1, body2)) {
+                        this.collide(body1, body2);
                     } else {
-                        force = this.gForce(obj1, obj2);
-                        mass1 = obj1.getMass();
-                        mass2 = obj2.getMass();
-                        obj1.accelerate(force[0] / mass1, force[1] / mass1, force[2] / mass1);
-                        obj2.accelerate(-force[0] / mass2, -force[1] / mass2, -force[2] / mass2);
+                        force = this.gForce(body1, body2);
+                        mass1 = body1.getMass();
+                        mass2 = body2.getMass();
+                        body1.accelerate(force[0] / mass1, force[1] / mass1, force[2] / mass1);
+                        body2.accelerate(-force[0] / mass2, -force[1] / mass2, -force[2] / mass2);
                     }
                 }
 
-                obj1.tick();
+                body1.tick();
             }
         }
     }
@@ -267,25 +268,47 @@ class Space {
 
     public void draw() {
         float[] position;
+        float[] orientation;
         float[] angle;
+        float brightness;
+        ArrayList<Float[]> lightsPositions = new ArrayList<Float[]>();
+        float[] lightPosition;
         PShape pshape;
+
+        for(Body body : this.bodies) {
+            if(body.getBrightness() == 255.0) {
+                lightPosition = body.getPosition();
+                lightsPositions.add(new Float[]{lightPosition[0], lightPosition[1], lightPosition[2]});
+            }
+        }
 
         noStroke();
         fill(255);
-        for(Body item : this.bodies) {
-            position = item.getPosition();
-            angle = item.getAnglePosition();
+        for(Body body : this.bodies) {
+            position = body.getPosition();
+            angle = body.getAnglePosition();
+            brightness = body.getBrightness();
+
+            lightFalloff(1.0, 0.0, 0.0);
+            ambientLight(brightness, brightness, brightness);
+            directionalLight(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+            for(Float[] innerLightPosition : lightsPositions) {
+                pointLight(255, 255, 255, innerLightPosition[0], innerLightPosition[1], innerLightPosition[2]);
+            }
 
             translate(position[0], position[1], position[2]);
 
-            pshape = createShape(SPHERE, item.getRadius());
-            pshape.setTexture(item.getTexture());
-            pshape.rotateY(angle[1]);
-            pshape.rotateX(angle[0]);
-            pshape.rotateY(angle[2]);
+            pshape = createShape(SPHERE, body.getRadius());
+            pshape.setTexture(body.getTexture());
+            orientation = body.getOrientation();
+            pshape.rotateY(angle[1] + Mathematics.Vector.angle(orientation[6], orientation[7], orientation[8], 1.0, 0.0, 0.0));
+            pshape.rotateX(angle[0] + Mathematics.Vector.angle(orientation[3], orientation[4], orientation[5], 0.0, 1.0, 0.0));
+            pshape.rotateY(angle[2] + Mathematics.Vector.angle(orientation[6], orientation[7], orientation[8], 1.0, 0.0, 0.0));
             shape(pshape, 0, 0);
 
             translate(-position[0], -position[1], -position[2]);
+
+            noLights();
         }
     }
 
@@ -300,6 +323,7 @@ class Space {
 
     public class Body extends Physics.SphericalBody {
         private float anglePositionX, anglePositionY, anglePositionZ, angleVelocityY;
+        private float brightness;
         private PImage texture;
         private boolean deleted;
 
@@ -307,11 +331,12 @@ class Space {
         public Body(float positionX, float positionY, float positionZ, float mass, float radius) {
             super(positionX, positionY, positionZ, mass, radius);
 
-            this.anglePositionX = 0;
-            this.anglePositionY = 0;
-            this.angleVelocityY = 0;
-            this.deleted = false;
+            this.anglePositionX = 0.0;
+            this.anglePositionY = 0.0;
+            this.angleVelocityY = 0.0;
+            this.brightness = 0.0;
             this.texture = null;
+            this.deleted = false;
         }
 
 
@@ -322,7 +347,7 @@ class Space {
         }
 
         public void setAnglePosition(float anglePositionX, float anglePositionZ) {
-            this.setAnglePosition(anglePositionX, 0, anglePositionZ);
+            this.setAnglePosition(anglePositionX, 0.0, anglePositionZ);
         }
 
         public float[] getAnglePosition() {
@@ -335,6 +360,14 @@ class Space {
 
         public float getAnglePeriod() {
             return TWO_PI / this.angleVelocityY;
+        }
+
+        public void setBrightness(float brightness) {
+            this.brightness = brightness;
+        }
+
+        public float getBrightness() {
+            return this.brightness;
         }
 
         public void setTexture(PImage texture) {

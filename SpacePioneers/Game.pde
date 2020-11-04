@@ -45,7 +45,7 @@ class Game {
     private Interface.KeyServer keyServer;
 
     private Interface.ButtonServer.Button buttonMenuBack;
-    private Interface.ButtonServer.Button buttonMenuCredits, buttonMenuSettings, buttonMenuPlay;
+    private Interface.ButtonServer.Button buttonMenuCredits, buttonMenuSettings, buttonMenuPlay, buttonMenuExit;
     private Interface.ButtonServer.Button buttonPlayMenu, buttonPlayResume, buttonPlaySettings, buttonPlayExit;
     private Interface.ButtonServer.Button buttonEditorMenu, buttonEditorResume, buttonEditorSettings, buttonEditorExit, buttonEditorSave;
     private Interface.ButtonServer.Button buttonMenuSingleplayer, buttonMenuMultiplayer, buttonMenuEditor;
@@ -99,17 +99,18 @@ class Game {
         w = width / 8.0;
         h = height / 16.0;
         x = (width - w) / 2.0;
-        this.buttonMenuPlay = this.buttonServer.new Button(x, height / 5.0 * 2.5 - h * 2.0, w, h, "PLAY");
-        this.buttonMenuSettings = this.buttonServer.new Button(x, height / 5.0 * 3.0 - h * 2.0, w, h, "SETTINGS");
-        this.buttonMenuCredits = this.buttonServer.new Button(x, height / 5.0 * 3.5 - h * 2.0, w, h, "CREDITS");
-        this.buttonPlayResume = this.buttonServer.new Button(x + 1, height / 5.0 * 2.5 - h * 2.0 + 1, w, h, "RESUME");
-        this.buttonPlaySettings = this.buttonServer.new Button(x + 1, height / 5.0 * 3.0 - h * 2.0 + 1, w, h, "SETTINGS");
-        this.buttonPlayExit = this.buttonServer.new Button(x + 1, height / 5.0 * 3.5 - h * 2.0 + 1, w, h, "EXIT");
+        this.buttonMenuPlay = this.buttonServer.new Button(x, height / 5.0 * 2.25 - h * 2.0, w, h, "PLAY");
+        this.buttonMenuSettings = this.buttonServer.new Button(x, height / 5.0 * 2.75 - h * 2.0, w, h, "SETTINGS");
+        this.buttonMenuCredits = this.buttonServer.new Button(x, height / 5.0 * 3.25 - h * 2.0, w, h, "CREDITS");
+        this.buttonMenuExit = this.buttonServer.new Button(x, height / 5.0 * 3.75 - h * 2.0, w, h, "EXIT");
+        this.buttonPlayResume = this.buttonServer.new Button(x + 1.0, height / 5.0 * 2.5 - h * 2.0 + 1.0, w, h, "RESUME");
+        this.buttonPlaySettings = this.buttonServer.new Button(x + 1.0, height / 5.0 * 3.0 - h * 2.0 + 1.0, w, h, "SETTINGS");
+        this.buttonPlayExit = this.buttonServer.new Button(x + 1.0, height / 5.0 * 3.5 - h * 2.0 + 1.0, w, h, "EXIT");
         w = width / 3.0;
         this.buttonEditorMenu = this.buttonServer.new Button(width - w, -5.0, width, height + 5.0, 5.0, 0.0, "");
         w = width / 8.0;
         h = height / 4.0;
-        x = 0;
+        x = 0.0;
         this.buttonEditorSave = this.buttonServer.new Button(x, h * 0.0, w, h, 2.0, 5.0, "SAVE");
         this.buttonEditorResume = this.buttonServer.new Button(x, h * 1.0, w, h, 2.0, 5.0, "RESUME");
         this.buttonEditorSettings = this.buttonServer.new Button(x, h * 2.0, w, h, 2.0, 5.0, "SETTINGS");
@@ -128,7 +129,7 @@ class Game {
         this.fieldMenuPort = this.buttonServer.new Button(x, y0 + h * 1.0, w, h, "16384");
         this.buttonMenuHost = this.buttonServer.new Button(x, y0 + h * 2.0, w, h, "HOST");
         this.buttonMenuConnect = this.buttonServer.new Button(x, y0 + h * 3.0, w, h, "CONNECT");
-        this.buttonServer.addContext(new Interface.ButtonServer.Button[]{this.buttonMenuPlay, this.buttonMenuSettings, this.buttonMenuCredits}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}); // main menu
+        this.buttonServer.addContext(new Interface.ButtonServer.Button[]{this.buttonMenuPlay, this.buttonMenuSettings, this.buttonMenuCredits, this.buttonMenuExit}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}); // main menu
         this.buttonServer.addContext(new Interface.ButtonServer.Button[]{this.buttonMenuBack}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}); // credits
         this.buttonServer.addContext(new Interface.ButtonServer.Button[]{this.buttonMenuBack}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}); // settings
         this.buttonServer.addContext(new Interface.ButtonServer.Button[]{this.buttonPlayMenu, this.buttonPlayResume, this.buttonPlaySettings, this.buttonPlayExit}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[]{}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}, new Interface.ButtonServer.Button[][]{{}}); // play menu
@@ -216,7 +217,9 @@ class Game {
 
         this.buttonServer.serve(this.context);
 
-        if(this.buttonMenuCredits.isActive()) {
+        if(this.buttonMenuExit.isActive()) {
+            exit();
+        } else if(this.buttonMenuCredits.isActive()) {
             this.buttonServer.clear(this.context);
             this.context = 1;
         } else if(this.buttonMenuSettings.isActive()) {
@@ -495,7 +498,7 @@ class Game {
         stroke(255);
         strokeWeight(2);
         fill(0, 127);
-        circle(mouseX, mouseY, 8);
+        circle(mouseX, mouseY, 8.0);
         noFill();
 
         if(this.textureLoader == null) {
@@ -517,7 +520,7 @@ class Game {
         stroke(255);
         strokeWeight(2);
         fill(0, 127);
-        circle(mouseX, mouseY, 8);
+        circle(mouseX, mouseY, 8.0);
         noFill();
 
         if(this.buttonPlayResume.isActive()) {
@@ -546,7 +549,7 @@ class Game {
         stroke(255);
         strokeWeight(2);
         fill(0, 127);
-        circle(mouseX, mouseY, 8);
+        circle(mouseX, mouseY, 8.0);
         noFill();
 
         if(this.buttonEditorSave.isActive()) {
@@ -620,30 +623,21 @@ class Game {
             if(this.keyServer.isPressed(UP)) { // pitch up
                 quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 rightX = vector[0];
                 rightY = vector[1];
                 rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
+                quaternion = Mathematics.Vector.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
@@ -653,30 +647,21 @@ class Game {
             if(this.keyServer.isPressed(DOWN)) { // pitch down
                 quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, upX, upY, upZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 rightX = vector[0];
                 rightY = vector[1];
                 rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
+                quaternion = Mathematics.Vector.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
@@ -686,30 +671,21 @@ class Game {
             if(this.keyServer.isPressed(RIGHT)) { // yaw right
                 quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
+                quaternion = Mathematics.Vector.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
@@ -719,30 +695,21 @@ class Game {
             if(this.keyServer.isPressed(LEFT)) { // yaw left
                 quaternion = Mathematics.rotateOnQuaternion(forwardX, forwardY, forwardZ, rightX, rightY, rightZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
+                quaternion = Mathematics.Vector.vectorProduct(rightX, rightY, rightZ, upX, upY, upZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 forwardX = vector[0];
                 forwardY = vector[1];
                 forwardZ = vector[2];
@@ -752,30 +719,21 @@ class Game {
             if(this.keyServer.isPressed('q')) { // roll counterclockwise
                 quaternion = Mathematics.rotateOnQuaternion(upX, upY, upZ, forwardX, forwardY, forwardZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 rightX = vector[0];
                 rightY = vector[1];
                 rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
@@ -785,30 +743,21 @@ class Game {
             if(this.keyServer.isPressed('e')) { // roll clockwise
                 quaternion = Mathematics.rotateOnQuaternion(upX, upY, upZ, forwardX, forwardY, forwardZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
+                quaternion = Mathematics.Vector.vectorProduct(upX, upY, upZ, forwardX, forwardY, forwardZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 rightX = vector[0];
                 rightY = vector[1];
                 rightZ = vector[2];
 
-                quaternion = Mathematics.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
+                quaternion = Mathematics.Vector.vectorProduct(forwardX, forwardY, forwardZ, rightX, rightY, rightZ);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
-                vectorLength = sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-                vector[0] /= vectorLength;
-                vector[1] /= vectorLength;
-                vector[2] /= vectorLength;
+                vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                 upX = vector[0];
                 upY = vector[1];
                 upZ = vector[2];
