@@ -40,11 +40,13 @@ void setup() {
 
     frameRate(FPS);
     noCursor();
-
-    game = new Game();
 }
 
 void draw() {
+    if(game == null) {
+        game = new Game();
+    }
+
     game.draw();
 }
 
