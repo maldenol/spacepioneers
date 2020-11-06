@@ -415,7 +415,7 @@ class Interface {
 
     private class Camera {
         private float positionX, positionY, positionZ, forwardX, forwardY, forwardZ, upX, upY, upZ, rightX, rightY, rightZ;
-        private float speed, angleSpeed, pitchAndYawToRollRatio;
+        private float speed, angleSpeed, sensivity;
         private float zoom;
         private final float zoomInit, zoomMin, zoomMax, zoomDiffDiv;
 
@@ -440,7 +440,7 @@ class Interface {
             this.rightX = 1.0;
             this.rightY = this.rightZ = 0.0;
             this.angleSpeed = TWO_PI / FPS * 2E-1;
-            this.pitchAndYawToRollRatio = 8.0;
+            this.sensivity = 8.0;
             this.speed = 1E2;
             this.zoom = 1.0;
             this.zoomInit = this.zoom;
@@ -552,7 +552,7 @@ class Interface {
 
             if(this.dof5or6) { // 6 degrees of freedom
                 if(mouseX != pmouseX) { // yaw
-                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.sensivity);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                     vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
@@ -574,7 +574,7 @@ class Interface {
                     this.forwardZ = vector[2];
                 }
                 if(mouseY != pmouseY) { // pitch
-                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.sensivity);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                     vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
@@ -597,7 +597,7 @@ class Interface {
                 }
             } else { // 5 degrees of freedom
                 if(mouseX != pmouseX) { // rotate left or right
-                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.upX, this.upY, this.upZ, map(mouseX - HALF_WIDTH, -HALF_WIDTH, HALF_WIDTH, this.angleSpeed, -this.angleSpeed) * this.sensivity);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                     vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];
@@ -605,7 +605,7 @@ class Interface {
                     this.forwardZ = vector[2];
                 }
                 if(mouseY != pmouseY) { // rotate up or down
-                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.pitchAndYawToRollRatio);
+                    quaternion = Mathematics.rotateOnQuaternion(this.forwardX, this.forwardY, this.forwardZ, this.rightX, this.rightY, this.rightZ, map(mouseY - HALF_HEIGHT, -HALF_HEIGHT, HALF_HEIGHT, this.angleSpeed, -this.angleSpeed) * this.sensivity);
                     vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                     vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
                     this.forwardX = vector[0];

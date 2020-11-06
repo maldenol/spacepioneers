@@ -131,9 +131,9 @@ class Space {
                 positionX = result[0][0];
                 positionY = result[0][1];
                 positionZ = result[0][2];
-                velocityX = result[1][0];
-                velocityY = result[1][1];
-                velocityZ = result[1][2];
+                velocityX = result[1][0] * sqrt(2);
+                velocityY = result[1][1] * sqrt(2);
+                velocityZ = result[1][2] * sqrt(2);
 
                 positionX += orbitPositionX;
                 positionY += orbitPositionY;
