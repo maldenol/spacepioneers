@@ -65,6 +65,7 @@ class Interface {
 
             this.keyServer = new KeyServer();
             this.keyServer.addKey(TAB);
+            this.keyServer.addKey(BACKSPACE);
         }
 
 
