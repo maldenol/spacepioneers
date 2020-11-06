@@ -10,3 +10,6 @@ application.macosx
 
 # for tests
 test.xml
+
+# screenshots
+SpacePioneers/data/screenshots/

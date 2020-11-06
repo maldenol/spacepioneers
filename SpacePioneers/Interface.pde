@@ -47,6 +47,8 @@ class Interface {
         private char fieldLastChar;
         private int timeLastPress, timeBetweenPresses;
 
+        private KeyServer keyServer;
+
 
         public ButtonServer() {
             this.buttons = new ArrayList<Button[]>();
@@ -60,6 +62,9 @@ class Interface {
             this.fieldLastChar = ' ';
             this.timeLastPress = 0;
             this.timeBetweenPresses = 300;
+
+            this.keyServer = new KeyServer();
+            this.keyServer.addKey(TAB);
         }
 
 
@@ -426,6 +431,8 @@ class Interface {
         private float relativeDistance;
         private final float relativeDistanceInit, relativeDistanceMin, relativeDistanceMax, relativeDistanceDiffDiv;
 
+        private char[] keymap;
+
         private Robot mouse;
 
         private Interface.KeyServer keyServer;
@@ -456,6 +463,8 @@ class Interface {
             this.relativeDistanceMin = 1E0;
             this.relativeDistanceMax = 1E3;
             this.relativeDistanceDiffDiv = 1E1;
+
+            this.keymap = new char[]{'w', 's', 'd', 'a', ' ', SHIFT, 'q', 'e', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', '+'};
 
             try {
                 this.mouse = new Robot();
@@ -616,37 +625,37 @@ class Interface {
 
             this.mouse.mouseMove((int)HALF_WIDTH, (int)HALF_HEIGHT);
 
-            if(this.keyServer.isPressed('w')) { // move forward
+            if(this.keyServer.isPressed(this.keymap[0])) { // move forward
                 this.positionX += this.forwardX * this.speed;
                 this.positionY += this.forwardY * this.speed;
                 this.positionZ += this.forwardZ * this.speed;
             }
-            if(this.keyServer.isPressed('s')) { // move backward
+            if(this.keyServer.isPressed(this.keymap[1])) { // move backward
                 this.positionX -= this.forwardX * this.speed;
                 this.positionY -= this.forwardY * this.speed;
                 this.positionZ -= this.forwardZ * this.speed;
             }
-            if(this.keyServer.isPressed('d')) { // move right
+            if(this.keyServer.isPressed(this.keymap[2])) { // move right
                 this.positionX += -this.rightX * this.speed;
                 this.positionY += -this.rightY * this.speed;
                 this.positionZ += -this.rightZ * this.speed;
             }
-            if(this.keyServer.isPressed('a')) { // move left
+            if(this.keyServer.isPressed(this.keymap[3])) { // move left
                 this.positionX -= -this.rightX * this.speed;
                 this.positionY -= -this.rightY * this.speed;
                 this.positionZ -= -this.rightZ * this.speed;
             }
-            if(this.keyServer.isPressed(' ')) { // move up
+            if(this.keyServer.isPressed(this.keymap[4])) { // move up
                 this.positionX -= this.upX * this.speed;
                 this.positionY -= this.upY * this.speed;
                 this.positionZ -= this.upZ * this.speed;
             }
-            if(this.keyServer.isPressed(SHIFT)) { // move down
+            if(this.keyServer.isPressed(this.keymap[5])) { // move down
                 this.positionX += this.upX * this.speed;
                 this.positionY += this.upY * this.speed;
                 this.positionZ += this.upZ * this.speed;
             }
-            if(this.keyServer.isPressed('q')) { // roll counterclockwise
+            if(this.keyServer.isPressed(this.keymap[6])) { // roll counterclockwise
                 quaternion = Mathematics.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
@@ -668,7 +677,7 @@ class Interface {
                 this.upY = vector[1];
                 this.upZ = vector[2];
             }
-            if(this.keyServer.isPressed('e')) { // roll clockwise
+            if(this.keyServer.isPressed(this.keymap[7])) { // roll clockwise
                 quaternion = Mathematics.rotateOnQuaternion(this.upX, this.upY, this.upZ, this.forwardX, this.forwardY, this.forwardZ, -this.angleSpeed);
                 vector = new float[]{quaternion[0], quaternion[1], quaternion[2]};
                 vector = Mathematics.Vector.normalize(vector[0], vector[1], vector[2]);
@@ -690,35 +699,22 @@ class Interface {
                 this.upY = vector[1];
                 this.upZ = vector[2];
             }
-            if(this.keyServer.isPressed('1')) { // zoom out
+            if(this.keyServer.isPressed(this.keymap[8])) { // zoom out
                 this.zoom -= this.zoom / this.zoomDiffDiv;
                 if(this.zoom < this.zoomMin) {
                     this.zoom = this.zoomMin;
                 }
             }
-            if(this.keyServer.isPressed('2')) { // default zoom
+            if(this.keyServer.isPressed(this.keymap[9])) { // default zoom
                 this.zoom = this.zoomInit;
             }
-            if(this.keyServer.isPressed('3')) { // zoom in
+            if(this.keyServer.isPressed(this.keymap[10])) { // zoom in
                 this.zoom += this.zoom / this.zoomDiffDiv;
                 if(this.zoom > this.zoomMax) {
                     this.zoom = this.zoomMax;
                 }
             }
-            if(this.keyServer.isPressed('4')) { // increase relative distance
-                if(this.viewingMode != 0) {
-                    this.relativeDistance -= this.relativeDistance / this.relativeDistanceDiffDiv;
-                    if(this.relativeDistance < this.relativeDistanceMin) {
-                        this.relativeDistance = this.relativeDistanceMin;
-                    }
-                }
-            }
-            if(this.keyServer.isPressed('5')) { // default relative distance
-                if(this.viewingMode != 0) {
-                    this.relativeDistance = this.relativeDistanceInit;
-                }
-            }
-            if(this.keyServer.isPressed('6')) { // decrease relative distance
+            if(this.keyServer.isPressed(this.keymap[11])) { // decrease relative distance
                 if(this.viewingMode != 0) {
                     this.relativeDistance += this.relativeDistance / this.relativeDistanceDiffDiv;
                     if(this.relativeDistance > this.relativeDistanceMax) {
@@ -726,7 +722,20 @@ class Interface {
                     }
                 }
             }
-            if(this.keyServer.isClicked('7')) { // previous viewing mode
+            if(this.keyServer.isPressed(this.keymap[12])) { // default relative distance
+                if(this.viewingMode != 0) {
+                    this.relativeDistance = this.relativeDistanceInit;
+                }
+            }
+            if(this.keyServer.isPressed(this.keymap[13])) { // increase relative distance
+                if(this.viewingMode != 0) {
+                    this.relativeDistance -= this.relativeDistance / this.relativeDistanceDiffDiv;
+                    if(this.relativeDistance < this.relativeDistanceMin) {
+                        this.relativeDistance = this.relativeDistanceMin;
+                    }
+                }
+            }
+            if(this.keyServer.isClicked(this.keymap[14])) { // previous viewing mode
                 float[] bodyPosition = this.relativeBody.getPosition();
                 float r = this.relativeDistance * this.relativeBody.getRadius();
 
@@ -745,7 +754,7 @@ class Interface {
                         break;
                 }
             }
-            if(this.keyServer.isClicked('8')) { // default viewing mode
+            if(this.keyServer.isClicked(this.keymap[15])) { // default viewing mode
                 float[] bodyPosition = this.relativeBody.getPosition();
                 float r = this.relativeDistance * this.relativeBody.getRadius();
 
@@ -764,7 +773,7 @@ class Interface {
 
                 this.viewingMode = 0;
             }
-            if(this.keyServer.isClicked('9')) { // next viewing mode
+            if(this.keyServer.isClicked(this.keymap[16])) { // next viewing mode
                 float[] bodyPosition = this.relativeBody.getPosition();
                 float r = this.relativeDistance * this.relativeBody.getRadius();
 
@@ -783,12 +792,16 @@ class Interface {
                         break;
                 }
             }
-            if(this.keyServer.isPressed('-')) { // 5 degree of freedom
+            if(this.keyServer.isPressed(this.keymap[17])) { // 5 degree of freedom
                 this.dof5or6 = false;
             }
-            if(this.keyServer.isPressed('+')) { // 6 degree of freedom
+            if(this.keyServer.isPressed(this.keymap[18])) { // 6 degree of freedom
                 this.dof5or6 = true;
             }
+        }
+
+        public void setKeymap(char[] keymap) {
+            this.keymap = keymap.clone();
         }
 
         public void setRelativeBody(Space.Body relativeBody) {
