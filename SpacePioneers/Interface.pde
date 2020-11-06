@@ -549,7 +549,6 @@ class Interface {
         public void controls() {
             float[] quaternion;
             float[] vector;
-            float vectorLength;
 
             if(this.dof5or6) { // 6 degrees of freedom
                 if(mouseX != pmouseX) { // yaw

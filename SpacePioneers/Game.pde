@@ -600,7 +600,6 @@ class Game {
             float forwardX = orientation[0], forwardY = orientation[1], forwardZ = orientation[2], upX = orientation[3], upY = orientation[4], upZ = orientation[5], rightX = orientation[6], rightY = orientation[7], rightZ = orientation[8];
             float[] quaternion;
             float[] vector;
-            float vectorLength;
 
             if(this.keyServer.isPressed('w')) { // move forward
                 this.body.accelerate(forwardX * this.speed, forwardY * this.speed, forwardZ * this.speed);
