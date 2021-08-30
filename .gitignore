@@ -7,3 +7,9 @@ application.linux64
 application.windows32
 application.windows64
 application.macosx
+
+# for tests
+test.xml
+
+# screenshots
+SpacePioneers/data/screenshots/

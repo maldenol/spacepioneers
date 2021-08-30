@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<space gravitationalConstant="1" detailMode="1">
-	<body name="" posX="0" posY="0" posZ="0" velX="0" velY="0" velZ="0" angPosX="0" angPosY="0" angPosZ="0" angPeriod="1" mass="0" radius="0" semiMajorAxis="0" eccentricity="0" argumentOfPeriapsis="0" longitudeOfAscendingNode="0" inclination="0" meanAnomaly="0">
-		
-	</body>
-</space>
